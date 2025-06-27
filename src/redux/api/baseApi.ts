@@ -12,9 +12,9 @@ import { toast } from "sonner";
 
 import type { RootState } from "../store";
 
-//http://localhost:5000/api
+//http://localhost:5000/api/v1
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:5000/api",
+  baseUrl: "http://localhost:5000/api/v1",
   credentials: "include",
   prepareHeaders: (headers: Headers, { getState }) => {
     const token = (getState() as RootState).auth.token;
