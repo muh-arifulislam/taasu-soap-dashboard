@@ -14,13 +14,32 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Outlet } from "react-router-dom";
+import React from "react";
+import { NavLink, Outlet } from "react-router-dom";
+
+import { useLocation } from "react-router-dom";
 export const DashboardLayout: React.FC = () => {
   const user = {
     name: "shadcn",
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   };
+
+  const breadcrumbNameMap: Record<string, string> = {
+    dashboard: "Dashboard",
+    products: "Products",
+    customers: "Customers",
+    users: "Users",
+    payments: "Payments",
+    list: "List",
+    orders: "Orders",
+    create: "Create",
+  };
+
+  const location = useLocation();
+  const pathnames = location.pathname.split("/").filter(Boolean);
+  // const currentPath = location.pathname;
+  // const pageTitle = breadcrumbMap[currentPath] || "Page";
 
   return (
     <>
@@ -37,13 +56,28 @@ export const DashboardLayout: React.FC = () => {
                 />
                 <Breadcrumb>
                   <BreadcrumbList>
-                    <BreadcrumbItem className="hidden md:block">
-                      <BreadcrumbLink href="#">Products</BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator className="hidden md:block" />
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>Products List</BreadcrumbPage>
-                    </BreadcrumbItem>
+                    {pathnames.map((segment, index) => {
+                      const routeTo = `/${pathnames
+                        .slice(0, index + 1)
+                        .join("/")}`;
+                      const isLast = index === pathnames.length - 1;
+                      const label = breadcrumbNameMap[segment] || segment;
+
+                      return (
+                        <React.Fragment key={routeTo}>
+                          <BreadcrumbItem>
+                            {isLast ? (
+                              <BreadcrumbPage>{label}</BreadcrumbPage>
+                            ) : (
+                              <BreadcrumbLink asChild>
+                                <NavLink to={routeTo}>{label}</NavLink>
+                              </BreadcrumbLink>
+                            )}
+                          </BreadcrumbItem>
+                          {!isLast && <BreadcrumbSeparator />}
+                        </React.Fragment>
+                      );
+                    })}
                   </BreadcrumbList>
                 </Breadcrumb>
               </div>
