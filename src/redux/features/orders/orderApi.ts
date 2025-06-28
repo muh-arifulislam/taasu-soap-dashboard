@@ -3,10 +3,15 @@ import { baseApi } from "@/redux/api/baseApi";
 const orderApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getOrders: builder.query({
-      query: () => ({
-        url: "/orders",
-        method: "GET",
-      }),
+      query: (params) => {
+        const queryString = new URLSearchParams(
+          params as Record<string, string>
+        ).toString();
+        return {
+          url: `/orders?${queryString}`,
+          method: "GET",
+        };
+      },
       providesTags: ["orders"],
     }),
     createOrder: builder.mutation({

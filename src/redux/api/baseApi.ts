@@ -11,6 +11,7 @@ import {
 import { toast } from "sonner";
 
 import type { RootState } from "../store";
+import { logout } from "../features/auth/authSlice";
 
 //http://localhost:5000/api/v1
 const baseQuery = fetchBaseQuery({
@@ -19,7 +20,7 @@ const baseQuery = fetchBaseQuery({
   prepareHeaders: (headers: Headers, { getState }) => {
     const token = (getState() as RootState).auth.token;
     if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
+      headers.set("Authorization", `${token}`);
     }
     return headers;
   },
@@ -31,9 +32,10 @@ const baseQueryWithRefreshToken: BaseQueryFn<
   DefinitionType
 > = async (args, api, extraOptions): Promise<any> => {
   const result = await baseQuery(args, api, extraOptions);
+  const dispatch = api.dispatch;
 
   if (result?.error?.status === 401) {
-    //logut user and clear auth state
+    dispatch(logout());
   }
   if (result?.error?.status === 404) {
     toast.error((result?.error?.data as any)?.message);
@@ -52,6 +54,7 @@ export const baseApi = createApi({
     "invoices",
     "payments",
     "users",
+    "auth",
   ],
   endpoints: () => ({}),
 });
