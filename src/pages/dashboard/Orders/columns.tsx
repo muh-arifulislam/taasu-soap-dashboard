@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { TOrder } from "@/types";
 import type { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import dayjs from "dayjs";
 
@@ -50,7 +50,7 @@ export const columns: ColumnDef<TOrder>[] = [
         to={`/dashboard/orders/${row.getValue("orderId")}`}
         className={"hover:underline"}
       >
-        #{row.getValue("orderId")}
+        {`#${row.getValue("orderId")}`}
       </NavLink>
     ),
   },
@@ -71,7 +71,8 @@ export const columns: ColumnDef<TOrder>[] = [
     accessorKey: "user",
     header: "Customer",
     cell: ({ row }) => {
-      const user = row.getValue("user");
+      const user: { _id: string; firstName: string; lastName: string } =
+        row.getValue("user");
 
       return (
         <NavLink
@@ -87,7 +88,7 @@ export const columns: ColumnDef<TOrder>[] = [
     accessorKey: "payment",
     header: "Payment Status",
     cell: ({ row }) => {
-      const payment = row.getValue("payment");
+      const payment: { status: string } = row.getValue("payment");
       return (
         <Button
           variant={
@@ -129,7 +130,6 @@ export const columns: ColumnDef<TOrder>[] = [
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const payment = row.original;
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -141,7 +141,9 @@ export const columns: ColumnDef<TOrder>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
+              onClick={() =>
+                navigator.clipboard.writeText(row.getValue("orderId"))
+              }
             >
               Copy payment ID
             </DropdownMenuItem>

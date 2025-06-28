@@ -50,7 +50,7 @@ export const DashboardLayout: React.FC = () => {
               <NavHeader user={user} />
             </div>
           </header>
-          <main>
+          <main className="min-h-[100vh]">
             <div className="p-4">
               <Outlet />
             </div>

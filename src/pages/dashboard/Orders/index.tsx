@@ -11,7 +11,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Loader, Loader2Icon } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SortDropdown } from "@/components/sort.dropdown";
 
@@ -26,7 +26,8 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from "@/components/ui/pagination";
-import TableSkeleton from "@/components/skeleton/TableSkeleton";
+import { TableSkeleton } from "@/components/skeleton/TableSkeleton";
+import { PaginationSkeleton } from "@/components/skeleton/PaginationSkeleton";
 
 const Orders: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -116,14 +117,7 @@ const Orders: React.FC = () => {
           <Input
             value={searchTerm}
             onChange={handleInputChange}
-            // onChange={(e) => {
-            //   if (e.target.value) {
-            //     setSearchTerm(e.target.value);
-            //   } else {
-            //     setSearchTerm("");
-            //   }
-            // }}
-            placeholder="Filter emails..."
+            placeholder="Search with Email, Name"
             className="max-w-sm"
           />
           <DropdownMenu>
@@ -177,48 +171,64 @@ const Orders: React.FC = () => {
           </Button>
         </div>
       </div>
-      <>{isLoading || isFetching ? <TableSkeleton /> : renderedTable}</>
       <>
-        {totalPages > 1 && (
-          <Pagination className="mt-4">
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                  className={page <= 1 ? "pointer-events-none opacity-50" : ""}
-                />
-              </PaginationItem>
-
-              {Array.from({ length: totalPages }).map((_, idx) => {
-                const pageNumber = idx + 1;
-                return (
-                  <PaginationItem key={pageNumber}>
-                    <button
-                      onClick={() => setPage(pageNumber)}
-                      className={`px-3 py-1 rounded-md ${
-                        page === pageNumber
-                          ? "bg-primary text-white"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {pageNumber}
-                    </button>
+        {isLoading || isFetching ? (
+          <TableSkeleton rows={8} columns={7} />
+        ) : (
+          renderedTable
+        )}
+      </>
+      <>
+        {isLoading || isFetching ? (
+          <PaginationSkeleton />
+        ) : (
+          <>
+            {totalPages > 1 && (
+              <Pagination className="mt-4">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                      className={
+                        page <= 1 ? "pointer-events-none opacity-50" : ""
+                      }
+                    />
                   </PaginationItem>
-                );
-              })}
 
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() =>
-                    setPage((prev) => Math.min(totalPages, prev + 1))
-                  }
-                  className={
-                    page >= totalPages ? "pointer-events-none opacity-50" : ""
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+                  {Array.from({ length: totalPages }).map((_, idx) => {
+                    const pageNumber = idx + 1;
+                    return (
+                      <PaginationItem key={pageNumber}>
+                        <button
+                          onClick={() => setPage(pageNumber)}
+                          className={`px-3 py-1 rounded-md ${
+                            page === pageNumber
+                              ? "bg-primary text-white"
+                              : "text-muted-foreground"
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      </PaginationItem>
+                    );
+                  })}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() =>
+                        setPage((prev) => Math.min(totalPages, prev + 1))
+                      }
+                      className={
+                        page >= totalPages
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </>
         )}
       </>
     </div>

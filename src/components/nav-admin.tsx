@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 import { NavLink } from "react-router-dom";
 
-export function NavMain({
+export function NavAdmin({
   items,
 }: {
   items: {
@@ -35,7 +35,7 @@ export function NavMain({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>All</SidebarGroupLabel>
+      <SidebarGroupLabel>Admin only</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible
