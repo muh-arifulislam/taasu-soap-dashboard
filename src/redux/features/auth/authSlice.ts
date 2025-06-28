@@ -5,7 +5,7 @@ export type TUser = {
   email: string;
   name?: string;
   picture?: string;
-  role: "user" | "admin" | "superAdmin";
+  role: "moderate" | "admin" | "superAdmin";
 };
 
 type TAuthState = {
