@@ -17,6 +17,8 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { Box, CreditCard, ShoppingCart, UserCircle, Users } from "lucide-react";
+import { useAppSelector } from "@/redux/hooks";
+import { selectCurrentUser } from "@/redux/features/auth/authSlice";
 
 // This is sample data.
 const data = {
@@ -85,11 +87,11 @@ const data = {
       items: [
         {
           title: "List",
-          url: "#",
+          url: "/dashboard/users",
         },
         {
           title: "Create",
-          url: "#",
+          url: "/dashboard/users/create",
         },
       ],
     },
@@ -97,6 +99,8 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const user = useAppSelector(selectCurrentUser);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -116,7 +120,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavAdmin items={data.admin} />
+
+        {(user?.role === "admin" || user?.role === "superAdmin") && (
+          <NavAdmin items={data.admin} />
+        )}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "./ui/sidebar";
 import { SunMoon } from "lucide-react";
-import { Badge } from "./ui/badge";
 
 export default function NavHeader({
   user,
@@ -31,16 +30,6 @@ export default function NavHeader({
         <Button variant={"ghost"} size={"icon"}>
           <SunMoon className="h-4 w-4" />
         </Button>
-        {/* Notification Button */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-4 w-4" />
-          <span className="absolute -top-1 -right-1">
-            <Badge className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums">
-              8
-            </Badge>
-          </span>
-        </Button>
-
         {/* Avatar Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

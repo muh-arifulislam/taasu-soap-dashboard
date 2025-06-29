@@ -55,6 +55,7 @@ export const baseApi = createApi({
     "payments",
     "users",
     "auth",
+    "profile",
   ],
   endpoints: () => ({}),
 });
