@@ -13,13 +13,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { useGetMeQuery } from "@/redux/features/users/userApi";
 import ProfileForm from "@/components/form/ProfileForm";
+import PasswordChangeForm from "@/components/form/PasswordChangeForm";
 
 const userRoles = {
   customer: "Customer",
@@ -202,101 +202,6 @@ export default function ProfilePage() {
                 setIsEditing={setIsEditing}
                 data={data?.data}
               />
-              {/* <form onSubmit={handleProfileSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input
-                      id="firstName"
-                      defaultValue={data?.data?.firstName}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input
-                      id="lastName"
-                      defaultValue={data?.data?.lastName}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    defaultValue={data?.data?.email}
-                    disabled
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="mobile">Phone Number</Label>
-                    <Input
-                      id="mobile"
-                      defaultValue={data?.data?.mobile}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="role">Role</Label>
-                    <Input id="role" defaultValue={data?.data?.role} disabled />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="addressLine1">Address Line1</Label>
-                    <Input
-                      id="addressLine1"
-                      type="text"
-                      defaultValue={data?.data?.addressLine1}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="addressLine2">Address Line2</Label>
-                    <Input
-                      id="addressLine2"
-                      type="text"
-                      defaultValue={data?.data?.addressLine2}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City</Label>
-                    <Input
-                      id="city"
-                      type="text"
-                      defaultValue={data?.data?.city}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="postalCode">Postal</Label>
-                    <Input
-                      id="postalCode"
-                      type="text"
-                      defaultValue={data?.data?.postal}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                </div>
-                {isEditing && (
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button type="submit" className="w-full sm:w-auto">
-                      Save Changes
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsEditing(false)}
-                      className="w-full sm:w-auto"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                )}
-              </form> */}
             </CardContent>
           </Card>
         </TabsContent>
@@ -400,19 +305,7 @@ export default function ProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
-                <Input id="currentPassword" type="password" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <Input id="newPassword" type="password" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <Input id="confirmPassword" type="password" />
-              </div>
-              <Button className="w-full sm:w-auto">Update Password</Button>
+              <PasswordChangeForm data={data?.data ?? {}} />
             </CardContent>
           </Card>
 

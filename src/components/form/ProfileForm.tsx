@@ -48,7 +48,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
   isEditing,
   setIsEditing,
 }) => {
-  const rawDefaultValues = pick(data, formFieldKeys);
+  const rawDefaultValues = pick(data ?? {}, formFieldKeys);
   // Normalize both for comparison
   const defaultFormValues = normalizeToEmptyString(rawDefaultValues);
 
