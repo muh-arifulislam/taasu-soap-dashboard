@@ -8,6 +8,7 @@ import Customers from "@/pages/dashboard/Customers";
 import CustomerDetails from "@/pages/dashboard/Customers/CustomerDetails";
 import Orders from "@/pages/dashboard/Orders";
 import OrderDetails from "@/pages/dashboard/Orders/Details";
+import Payments from "@/pages/dashboard/Payments";
 import ProfilePage from "@/pages/dashboard/Profile";
 import Users from "@/pages/dashboard/Users";
 import CreateUserPage from "@/pages/dashboard/Users/Create";
@@ -56,6 +57,7 @@ export const router = createBrowserRouter([
         path: "customers/:id",
         element: <CustomerDetails />,
       },
+      { path: "payments", element: <Payments /> },
       { path: "account", element: <ProfilePage /> },
       {
         path: "users",

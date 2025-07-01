@@ -36,6 +36,9 @@ export const UserActionCell: React.FC<UserActionCellProps> = ({ user }) => {
 
   const canCurrentUserModify = () => {
     if (!currentUser || !user) return false;
+
+    if (user.email === "moderator@gmail.com") return false;
+
     if (currentUser.email === user.email) return false; // cannot modify self
     if (currentUser.role === "superAdmin") {
       // superAdmin can modify admin and moderator

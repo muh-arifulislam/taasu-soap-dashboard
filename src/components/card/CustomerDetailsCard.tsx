@@ -4,40 +4,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Mail, MapPin } from "lucide-react";
 import { Separator } from "../ui/separator";
 import { NavLink } from "react-router-dom";
+import type { IUser, IUserAddress } from "@/types";
+import dayjs from "dayjs";
 
 interface CustomerDetailsProps {
-  name?: string;
-  email?: string;
-  address?: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-  profileImage?: string;
+  data: IUser;
 }
 
-export default function CustomerDetailsCard({
-  name = "Sarah Johnson",
-  email = "sarah.johnson@example.com",
-  address = {
-    street: "123 Oak Street, Apt 4B",
-    city: "San Francisco",
-    state: "CA",
-    zipCode: "94102",
-    country: "United States",
-  },
-  profileImage = "/placeholder.svg?height=80&width=80",
-}: CustomerDetailsProps) {
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((word) => word.charAt(0))
-      .join("")
-      .toUpperCase();
-  };
-
+export default function CustomerDetailsCard({ data }: CustomerDetailsProps) {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
@@ -53,19 +27,19 @@ export default function CustomerDetailsCard({
         {/* Profile Section */}
         <div className="flex items-center space-x-4">
           <Avatar className="h-12 w-12">
-            <AvatarImage src={profileImage || "/placeholder.svg"} alt={name} />
-            <AvatarFallback className="text-lg font-semibold">
-              {getInitials(name)}
-            </AvatarFallback>
+            <AvatarImage src={""} alt={"profile picture"} />
+            <AvatarFallback className="text-lg font-semibold">U</AvatarFallback>
           </Avatar>
           <div className="flex-1">
             <NavLink
               to={"#"}
-              className="text-xl font-semibold text-foreground hover:underline"
+              className="text-lg font-semibold text-foreground hover:underline"
             >
-              {name}
+              {data?.firstName} {data?.lastName}
             </NavLink>
-            <p className="text-sm text-muted-foreground">Customer since 2023</p>
+            <p className="text-sm text-muted-foreground">
+              Customer since {dayjs(data?.createdAt).format("YYYY")}
+            </p>
           </div>
         </div>
 
@@ -74,7 +48,9 @@ export default function CustomerDetailsCard({
           <div className="flex items-center space-x-3">
             <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-foreground">{email}</p>
+              <p className="text-sm font-medium text-foreground">
+                {data?.email}
+              </p>
               <p className="text-xs text-muted-foreground">Primary email</p>
             </div>
           </div>
@@ -86,23 +62,23 @@ export default function CustomerDetailsCard({
                 Delivery Address
               </p>
               <div className="text-sm text-muted-foreground space-y-1">
-                <p>{address.street}</p>
                 <p>
-                  {address.city}, {address.state} {address.zipCode}
+                  {(data?.address as unknown as IUserAddress)?.addressLine1}
                 </p>
-                <p>{address.country}</p>
+                <p> {(data?.address as unknown as IUserAddress)?.city}</p>
+                <p>Bangladesh</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Additional Info */}
-        <div className="pt-4 border-t">
+        {/* <div className="pt-4 border-t">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Total Orders</span>
             <span className="font-medium">24</span>
           </div>
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );

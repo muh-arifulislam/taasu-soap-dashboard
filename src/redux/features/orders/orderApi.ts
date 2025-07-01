@@ -19,6 +19,7 @@ const orderApi = baseApi.injectEndpoints({
         url: `/orders/${id}`,
         method: "GET",
       }),
+      providesTags: ["order"],
     }),
     createOrder: builder.mutation({
       query: (orderData) => ({
@@ -29,12 +30,12 @@ const orderApi = baseApi.injectEndpoints({
       invalidatesTags: ["orders"],
     }),
     updateOrder: builder.mutation({
-      query: ({ id, ...orderData }) => ({
+      query: ({ id, payload }) => ({
         url: `/orders/${id}`,
         method: "PUT",
-        body: orderData,
+        body: payload,
       }),
-      invalidatesTags: ["orders"],
+      invalidatesTags: ["order", "orders"],
     }),
     deleteOrder: builder.mutation({
       query: (id) => ({

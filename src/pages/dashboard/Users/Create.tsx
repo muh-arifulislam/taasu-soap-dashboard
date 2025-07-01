@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useCreateAdminUserMutation } from "@/redux/features/users/userApi";
+import { toast } from "sonner";
 
 const formSchema = z
   .object({
@@ -78,9 +79,13 @@ export default function CreateUserPage() {
       try {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { confirmPassword, ...userPayload } = values;
-        await handleCreateAdminUser({
+        const result = await handleCreateAdminUser({
           payload: userPayload,
         });
+
+        if (result?.data?.success) {
+          toast.success("User created successful!");
+        }
         reset();
       } catch (error) {
         console.log(error);

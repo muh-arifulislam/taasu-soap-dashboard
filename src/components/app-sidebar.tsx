@@ -19,6 +19,7 @@ import {
 import { Box, CreditCard, ShoppingCart, UserCircle, Users } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 import { selectCurrentUser } from "@/redux/features/auth/authSlice";
+import { useGetMeQuery } from "@/redux/features/users/userApi";
 
 // This is sample data.
 const data = {
@@ -27,7 +28,6 @@ const data = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
-
   navMain: [
     {
       title: "Orders",
@@ -59,7 +59,7 @@ const data = {
       items: [
         {
           title: "List",
-          url: "#",
+          url: "/dashboard/payments",
         },
       ],
     },
@@ -101,6 +101,8 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useAppSelector(selectCurrentUser);
 
+  const { data: userData } = useGetMeQuery(undefined);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -126,7 +128,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         )}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser
+          user={{
+            name: `${userData?.data?.firstName} ${userData?.data?.lastName}`,
+            email: userData?.data?.email ?? "example@gmail.com",
+            avatar: "",
+          }}
+        />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

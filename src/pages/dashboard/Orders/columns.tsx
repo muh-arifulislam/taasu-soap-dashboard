@@ -2,19 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import type { TOrder } from "@/types";
 import type { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import dayjs from "dayjs";
+import { OrderActionCell } from "./OrderActionCell";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -127,32 +119,14 @@ export const columns: ColumnDef<TOrder>[] = [
   },
 
   {
-    id: "actions",
+    id: "orderId" + "0",
+    accessorKey: "orderId",
     enableHiding: false,
+    header: "",
     cell: ({ row }) => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() =>
-                navigator.clipboard.writeText(row.getValue("orderId"))
-              }
-            >
-              Copy payment ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+      const orderData = row.original;
+
+      return <OrderActionCell order={orderData} />;
     },
   },
 ];

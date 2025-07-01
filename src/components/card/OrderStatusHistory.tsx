@@ -9,69 +9,26 @@ import {
   PackageCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import dayjs from "dayjs";
 
 interface StatusHistoryItem {
+  _id: string;
   status: string;
   message: string;
   timestamp: string;
-  isCompleted: boolean;
-  isActive?: boolean;
 }
 
 interface OrderStatusHistoryProps {
   orderNumber?: string;
-  statusHistory?: StatusHistoryItem[];
+  statusHistory: StatusHistoryItem[];
 }
 
 export default function OrderStatusHistory({
   orderNumber = "ORD-2024-001",
-  statusHistory = [
-    {
-      status: "Order Placed",
-      message: "Your order has been successfully placed and payment confirmed.",
-      timestamp: "2024-01-15T10:30:00Z",
-      isCompleted: true,
-    },
-    {
-      status: "Processing",
-      message: "Your order is being prepared and packaged.",
-      timestamp: "2024-01-15T14:20:00Z",
-      isCompleted: true,
-    },
-    {
-      status: "Shipped",
-      message: "Your order has been shipped via FedEx. Tracking: FX123456789",
-      timestamp: "2024-01-16T09:15:00Z",
-      isCompleted: true,
-    },
-    {
-      status: "Out for Delivery",
-      message: "Your package is out for delivery and will arrive today.",
-      timestamp: "2024-01-17T08:45:00Z",
-      isCompleted: false,
-      isActive: true,
-    },
-    {
-      status: "Delivered",
-      message: "Package will be delivered to your address.",
-      timestamp: "",
-      isCompleted: false,
-    },
-  ],
+  statusHistory,
 }: OrderStatusHistoryProps) {
-  const getStatusIcon = (
-    status: string,
-    isCompleted: boolean,
-    isActive?: boolean
-  ) => {
-    const iconClass = cn(
-      "h-5 w-5",
-      isCompleted
-        ? "text-green-600"
-        : isActive
-        ? "text-blue-600"
-        : "text-gray-400"
-    );
+  const getStatusIcon = (status: string) => {
+    const iconClass = cn("h-5 w-5", "text-green-600");
 
     switch (status.toLowerCase()) {
       case "order placed":
@@ -108,39 +65,34 @@ export default function OrderStatusHistory({
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold">Order Status</CardTitle>
           <Badge variant="outline" className="text-xs font-mono">
-            {orderNumber}
+            #{orderNumber}
           </Badge>
         </div>
       </CardHeader>
       <CardContent>
         <div className="relative">
-          {statusHistory.map((item, index) => (
+          {statusHistory?.map((item, index) => (
             <div
               key={index}
               className="relative flex items-start space-x-4 pb-6 last:pb-0"
             >
               {/* Timeline Line */}
-              {index < statusHistory.length - 1 && (
+              {/* {index < statusHistory.length - 1 && (
                 <div
                   className={cn(
                     "absolute left-6 top-8 w-0.5 h-16",
                     item.isCompleted ? "bg-green-200" : "bg-gray-200"
                   )}
                 />
-              )}
+              )} */}
 
               {/* Status Icon */}
               <div
                 className={cn(
-                  "flex items-center justify-center w-12 h-12 rounded-full border-2 bg-white z-10",
-                  item.isCompleted
-                    ? "border-green-200 bg-green-50"
-                    : item.isActive
-                    ? "border-blue-200 bg-blue-50"
-                    : "border-gray-200 bg-gray-50"
+                  "flex items-center justify-center w-12 h-12 rounded-full border-2 z-10 border-green-200 bg-green-50"
                 )}
               >
-                {getStatusIcon(item.status, item.isCompleted, item.isActive)}
+                {getStatusIcon(item.status)}
               </div>
 
               {/* Status Content */}
@@ -171,7 +123,11 @@ export default function OrderStatusHistory({
           <div className="flex items-center space-x-2">
             <Truck className="h-4 w-4 text-blue-600" />
             <span className="text-sm font-medium text-blue-900">
-              Estimated Delivery: Today by 6:00 PM
+              Estimated Delivery:{" "}
+              {statusHistory?.length &&
+                dayjs(statusHistory[0]?.timestamp)
+                  .add(7, "day")
+                  .format("MMMM D, YYYY")}
             </span>
           </div>
         </div>

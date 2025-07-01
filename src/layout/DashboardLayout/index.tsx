@@ -14,17 +14,12 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { useGetMeQuery } from "@/redux/features/users/userApi";
 import React from "react";
 import { NavLink, Outlet } from "react-router-dom";
 
 import { useLocation } from "react-router-dom";
 export const DashboardLayout: React.FC = () => {
-  const user = {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  };
-
   const breadcrumbNameMap: Record<string, string> = {
     dashboard: "Dashboard",
     products: "Products",
@@ -40,6 +35,8 @@ export const DashboardLayout: React.FC = () => {
   const pathnames = location.pathname.split("/").filter(Boolean);
   // const currentPath = location.pathname;
   // const pageTitle = breadcrumbMap[currentPath] || "Page";
+
+  const { data } = useGetMeQuery(undefined);
 
   return (
     <>
@@ -81,7 +78,13 @@ export const DashboardLayout: React.FC = () => {
                   </BreadcrumbList>
                 </Breadcrumb>
               </div>
-              <NavHeader user={user} />
+              <NavHeader
+                user={{
+                  name: `${data?.data?.firstName} ${data?.data?.lastName}`,
+                  email: data?.data?.email ?? "example@gmail.com",
+                  avatar: "",
+                }}
+              />
             </div>
           </header>
           <main className="min-h-[100vh]">

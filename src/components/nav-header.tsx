@@ -1,4 +1,4 @@
-import { BadgeCheck, Bell, LogOut } from "lucide-react";
+import { BadgeCheck, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -12,6 +12,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "./ui/sidebar";
 import { SunMoon } from "lucide-react";
+import { useAppDispatch } from "@/redux/hooks";
+import { useNavigate } from "react-router-dom";
+import { logout } from "@/redux/features/auth/authSlice";
 
 export default function NavHeader({
   user,
@@ -23,6 +26,10 @@ export default function NavHeader({
   };
 }) {
   const { isMobile } = useSidebar();
+
+  const dispatch = useAppDispatch();
+
+  const navigate = useNavigate();
 
   return (
     <header className="flex items-center justify-between px-4 py-3 bg-background">
@@ -58,17 +65,13 @@ export default function NavHeader({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/dashboard/account")}>
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => dispatch(logout())}>
               <LogOut />
               Log out
             </DropdownMenuItem>

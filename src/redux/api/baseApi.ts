@@ -58,6 +58,7 @@ export const baseApi = createApi({
     "users",
     "auth",
     "profile",
+    "order",
   ],
   endpoints: () => ({}),
 });
