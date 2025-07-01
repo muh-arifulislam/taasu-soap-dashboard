@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo, useState } from "react";
-import type { TOrder } from "@/types";
 import { Input } from "@/components/ui/input";
 
 import { Button } from "@/components/ui/button";
@@ -18,9 +17,10 @@ import {
 } from "@/components/ui/pagination";
 import { TableSkeleton } from "@/components/skeleton/TableSkeleton";
 import { PaginationSkeleton } from "@/components/skeleton/PaginationSkeleton";
-import { useGetCustomersQuery } from "@/redux/features/customers/customerApi";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
+import { useGetAdminUsersQuery } from "@/redux/features/users/userApi";
+import type { IUser } from "@/types";
 
 const Users: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -83,7 +83,7 @@ const Users: React.FC = () => {
   const [sortBy, sortOrder] = sortValue.split("-");
 
   // Trigger fetch
-  const { data, isLoading, isFetching, refetch } = useGetCustomersQuery({
+  const { data, isLoading, isFetching, refetch } = useGetAdminUsersQuery({
     searchTerm: debouncedSearchTerm,
     sortBy,
     sortOrder: sortOrder as "asc" | "desc",
@@ -97,7 +97,7 @@ const Users: React.FC = () => {
   // 🧠 Memoize heavy DataTable
   const renderedTable = useMemo(() => {
     return (
-      <DataTable<TOrder, unknown> columns={columns} data={data?.data || []} />
+      <DataTable<IUser, unknown> columns={columns} data={data?.data || []} />
     );
   }, [data?.data]);
 

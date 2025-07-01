@@ -2,24 +2,17 @@
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import type { TOrder } from "@/types";
+import type { IUser } from "@/types";
 import type { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
-import { NavLink } from "react-router-dom";
 import dayjs from "dayjs";
+import { Badge } from "@/components/ui/badge";
+import { UserRole, type TUserRole } from "@/types/user";
+import { UserActionCell } from "./UserActionCell";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 
-export const columns: ColumnDef<TOrder>[] = [
+export const columns: ColumnDef<IUser>[] = [
   {
     id: "_id",
     header: ({ table }) => (
@@ -47,7 +40,6 @@ export const columns: ColumnDef<TOrder>[] = [
     header: "Name",
     cell: ({ row }) => {
       const fullName: string = row.getValue("fullName");
-
       return <span>{fullName.length < 2 ? "N/A" : fullName}</span>;
     },
   },
@@ -56,11 +48,18 @@ export const columns: ColumnDef<TOrder>[] = [
     header: "Email",
   },
   {
+    accessorKey: "role",
+    header: "Role",
+    cell: ({ row }) => {
+      const role: TUserRole = row.getValue("role");
+      return <Badge variant={"secondary"}>{UserRole[role]}</Badge>;
+    },
+  },
+  {
     accessorKey: "createdAt",
     header: "Created at",
     cell: ({ row }) => {
       const createdAt: string = row.getValue("createdAt");
-
       return (
         <div className="">
           {dayjs(createdAt as string).format("MMM D, YYYY")}
@@ -73,22 +72,21 @@ export const columns: ColumnDef<TOrder>[] = [
     header: "Phone",
     cell: ({ row }) => {
       const phoneNumber: string = row.getValue("mobile");
-
       return <span>{phoneNumber ?? "N/A"}</span>;
     },
   },
   {
-    accessorKey: "payment",
+    accessorKey: "isDisabled",
     header: "Status",
     cell: ({ row }) => {
-      const payment: { status: string } = row.getValue("payment");
+      const isDisabled: { status: string } = row.getValue("isDisabled");
       return (
         <Button
-          variant={"outline"}
+          variant={isDisabled ? "destructive" : "outline"}
           className="pointer-events-none capitalize"
           size="sm"
         >
-          {payment?.status || "unknown"}
+          {isDisabled ? "Disabled" : "Enabled"}
         </Button>
       );
     },
@@ -99,25 +97,10 @@ export const columns: ColumnDef<TOrder>[] = [
     enableHiding: false,
     header: "",
     cell: ({ row }) => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <NavLink to={`/dashboard/customers/${row.getValue("userId")}`}>
-                View customer
-              </NavLink>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+      // Get all user data for this row
+      const userData = row.original;
+
+      return <UserActionCell user={userData} />;
     },
   },
 ];

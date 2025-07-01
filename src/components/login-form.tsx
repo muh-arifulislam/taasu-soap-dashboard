@@ -13,19 +13,21 @@ import { Label } from "@/components/ui/label";
 import type React from "react";
 import { useLoginWithEmailMutation } from "@/redux/features/auth/authApi";
 import { verifyToken } from "@/utils";
-import { useAppDispatch } from "@/redux/hooks";
-import { setUser } from "@/redux/features/auth/authSlice";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { selectCurrentToken, setUser } from "@/redux/features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "./ui/badge";
 import { Eye, EyeOff, LogIn, Shield, User } from "lucide-react";
 import { Separator } from "./ui/separator";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const token = useAppSelector(selectCurrentToken);
+
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
@@ -52,11 +54,29 @@ export function LoginForm({
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Login attempt:", { email, password });
-      alert(`Login attempt with: ${email}`);
-    }, 1000);
+    try {
+      const result = await loginWithEmail({
+        email,
+        password,
+      });
+      if (result?.data?.success) {
+        const token = result?.data?.data?.accessToken;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const decoded: any = verifyToken(token);
+        const user = {
+          email: decoded.email,
+          role: decoded.role,
+          // add other required fields if TUser has more
+        };
+
+        dispatch(setUser({ user, token }));
+        navigate("/dashboard");
+      } else {
+        throw new Error("Failed to login");
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const handleDemoLogin = async (role: "moderator" | "admin") => {
@@ -89,6 +109,12 @@ export function LoginForm({
       toast.error(err?.message);
     }
   };
+
+  useEffect(() => {
+    if (token) {
+      navigate("/dashboard");
+    }
+  }, [token]);
 
   return (
     <>

@@ -173,13 +173,13 @@ export default function ProfilePage() {
             <Users className="h-4 w-4" />
             <span className="hidden sm:inline">Personal</span>
           </TabsTrigger>
-          <TabsTrigger value="permissions" className="flex items-center gap-2">
-            <Key className="h-4 w-4" />
-            <span className="hidden sm:inline">Permissions</span>
-          </TabsTrigger>
           <TabsTrigger value="security" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
             <span className="hidden sm:inline">Security</span>
+          </TabsTrigger>
+          <TabsTrigger value="permissions" className="flex items-center gap-2">
+            <Key className="h-4 w-4" />
+            <span className="hidden sm:inline">Permissions</span>
           </TabsTrigger>
           <TabsTrigger value="system" className="flex items-center gap-2">
             <Database className="h-4 w-4" />
@@ -202,95 +202,6 @@ export default function ProfilePage() {
                 setIsEditing={setIsEditing}
                 data={data?.data}
               />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Permissions Tab */}
-        <TabsContent value="permissions" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Admin Permissions</CardTitle>
-              <CardDescription>
-                Your current administrative access levels and permissions.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-4">
-                    <h4 className="font-medium">User Management</h4>
-                    <div className="space-y-3 pl-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Create Users</span>
-                        <Badge variant="secondary">Granted</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Delete Users</span>
-                        <Badge variant="secondary">Granted</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Modify Permissions</span>
-                        <Badge variant="secondary">Granted</Badge>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <h4 className="font-medium">System Access</h4>
-                    <div className="space-y-3 pl-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Database Access</span>
-                        <Badge variant="secondary">Granted</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">System Configuration</span>
-                        <Badge variant="secondary">Granted</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Server Management</span>
-                        <Badge variant="destructive">Restricted</Badge>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <Separator />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-4">
-                    <h4 className="font-medium">Content Management</h4>
-                    <div className="space-y-3 pl-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Product Management</span>
-                        <Badge variant="secondary">Granted</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Order Management</span>
-                        <Badge variant="secondary">Granted</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Content Publishing</span>
-                        <Badge variant="secondary">Granted</Badge>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <h4 className="font-medium">Financial Access</h4>
-                    <div className="space-y-3 pl-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">View Reports</span>
-                        <Badge variant="secondary">Granted</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Payment Processing</span>
-                        <Badge variant="destructive">Restricted</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Financial Reports</span>
-                        <Badge variant="secondary">Granted</Badge>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -392,6 +303,95 @@ export default function ProfilePage() {
                 >
                   Revoke All Other Sessions
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Permissions Tab */}
+        <TabsContent value="permissions" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Admin Permissions</CardTitle>
+              <CardDescription>
+                Your current administrative access levels and permissions.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    <h4 className="font-medium">User Management</h4>
+                    <div className="space-y-3 pl-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Create Users</span>
+                        <Badge variant="secondary">Granted</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Delete Users</span>
+                        <Badge variant="secondary">Granted</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Modify Permissions</span>
+                        <Badge variant="secondary">Granted</Badge>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <h4 className="font-medium">System Access</h4>
+                    <div className="space-y-3 pl-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Database Access</span>
+                        <Badge variant="secondary">Granted</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">System Configuration</span>
+                        <Badge variant="secondary">Granted</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Server Management</span>
+                        <Badge variant="destructive">Restricted</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <Separator />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Content Management</h4>
+                    <div className="space-y-3 pl-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Product Management</span>
+                        <Badge variant="secondary">Granted</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Order Management</span>
+                        <Badge variant="secondary">Granted</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Content Publishing</span>
+                        <Badge variant="secondary">Granted</Badge>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Financial Access</h4>
+                    <div className="space-y-3 pl-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">View Reports</span>
+                        <Badge variant="secondary">Granted</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Payment Processing</span>
+                        <Badge variant="destructive">Restricted</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Financial Reports</span>
+                        <Badge variant="secondary">Granted</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

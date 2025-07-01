@@ -14,4 +14,5 @@ export type TOrder = {
   orderStatus: TOrderStatus;
   createdAt: string;
   updatedAt: string;
+  isDisabled?: boolean;
 };

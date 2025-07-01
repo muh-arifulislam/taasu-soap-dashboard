@@ -10,6 +10,7 @@ import Orders from "@/pages/dashboard/Orders";
 import OrderDetails from "@/pages/dashboard/Orders/Details";
 import ProfilePage from "@/pages/dashboard/Profile";
 import Users from "@/pages/dashboard/Users";
+import CreateUserPage from "@/pages/dashboard/Users/Create";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 export const router = createBrowserRouter([
@@ -61,6 +62,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedAdmin>
             <Users />
+          </ProtectedAdmin>
+        ),
+      },
+      {
+        path: "users/create",
+        element: (
+          <ProtectedAdmin>
+            <CreateUserPage />
           </ProtectedAdmin>
         ),
       },
