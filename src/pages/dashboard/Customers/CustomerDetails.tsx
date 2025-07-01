@@ -126,7 +126,7 @@ export default function CustomerDetails() {
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" asChild>
-          <NavLink to="/customers">
+          <NavLink to="/dashboard/customers">
             <ArrowLeft className="h-4 w-4" />
           </NavLink>
         </Button>

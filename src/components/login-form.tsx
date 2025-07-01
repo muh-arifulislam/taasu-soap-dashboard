@@ -40,13 +40,13 @@ export function LoginForm({
   // Demo credentials
   const demoCredentials = {
     moderator: {
-      email: "visitor@example.com",
-      password: "visitor",
+      email: "moderator@gmail.com",
+      password: "moderator123",
       role: "Moderator",
     },
     admin: {
-      email: "admin@example.com",
-      password: "admin",
+      email: "admin@gmail.com",
+      password: "admin123",
       role: "Admin",
     },
   };
@@ -241,7 +241,7 @@ export function LoginForm({
                 </p>
                 <p>
                   Admin: {demoCredentials.admin.email} /{" "}
-                  {demoCredentials.admin.email}
+                  {demoCredentials.admin.password}
                 </p>
               </div>
             </div>
