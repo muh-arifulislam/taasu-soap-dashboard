@@ -69,12 +69,20 @@ const data = {
       icon: Box,
       items: [
         {
-          title: "List",
-          url: "#",
+          title: "Products List",
+          url: "/dashboard/products",
         },
         {
-          title: "Create",
-          url: "#",
+          title: "Add Product",
+          url: "/dashboard/products/create",
+        },
+        {
+          title: "Manage Categories",
+          url: "/dashboard/products/categories",
+        },
+        {
+          title: "Manage Discounts",
+          url: "/dashboard/products/discounts",
         },
       ],
     },

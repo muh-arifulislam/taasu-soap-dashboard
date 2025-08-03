@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { useGetOrdersQuery } from "@/redux/features/orders/orderApi";
@@ -15,8 +15,6 @@ import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SortDropdown } from "@/components/sort.dropdown";
 
-import debounce from "lodash.debounce";
-
 import { useEffect } from "react";
 
 import {
@@ -28,29 +26,15 @@ import {
 } from "@/components/ui/pagination";
 import { TableSkeleton } from "@/components/skeleton/TableSkeleton";
 import { PaginationSkeleton } from "@/components/skeleton/PaginationSkeleton";
+import { useDebouncedInput } from "@/hooks/useDebouncedInput";
 
 const Orders: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-
-  // Create debounced setter for searchTerm
-  const debouncedSetter = useMemo(
-    () =>
-      debounce((value: string) => {
-        setDebouncedSearchTerm(value);
-      }, 500),
-    []
-  );
-
-  // Input change handler (only updates debouncedSearchTerm)
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setSearchTerm(value);
-      debouncedSetter(value);
-    },
-    [debouncedSetter]
-  );
+  const {
+    searchTerm,
+    debouncedSearchTerm,
+    handleInputChange,
+    debouncedSetter,
+  } = useDebouncedInput();
 
   // Cancel debounce on unmount
   useEffect(() => {
@@ -58,30 +42,6 @@ const Orders: React.FC = () => {
       debouncedSetter.cancel();
     };
   }, [debouncedSetter]);
-
-  //   // Create a debounced function
-  //   const debouncedChangeHandler = useCallback(
-  //     debounce((value: string) => {
-  //       setDebouncedSearchTerm(value);
-  //     }, 500),
-  //     []
-  //   );
-
-  //   // Handle input changes
-  //   useEffect(() => {
-  //     if (searchTerm === "") {
-  //       // If input is cleared, cancel debounce and immediately update
-  //       debouncedChangeHandler.cancel();
-  //       setDebouncedSearchTerm("");
-  //     } else {
-  //       debouncedChangeHandler(searchTerm);
-  //     }
-
-  //     // Cleanup on unmount
-  //     return () => {
-  //       debouncedChangeHandler.cancel();
-  //     };
-  //   }, [searchTerm, debouncedChangeHandler]);
 
   const [statusFilter, setStatusFilter] = useState("");
   const [sortValue, setSortValue] = useState("");

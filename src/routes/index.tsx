@@ -9,6 +9,10 @@ import CustomerDetails from "@/pages/dashboard/Customers/CustomerDetails";
 import Orders from "@/pages/dashboard/Orders";
 import OrderDetails from "@/pages/dashboard/Orders/Details";
 import Payments from "@/pages/dashboard/Payments";
+import Products from "@/pages/dashboard/Products";
+import CategoriesPage from "@/pages/dashboard/Products/categories";
+import AddProductPage from "@/pages/dashboard/Products/add/CreateProduct";
+import DiscountsPage from "@/pages/dashboard/Products/discounts";
 import ProfilePage from "@/pages/dashboard/Profile";
 import Users from "@/pages/dashboard/Users";
 import CreateUserPage from "@/pages/dashboard/Users/Create";
@@ -57,6 +61,10 @@ export const router = createBrowserRouter([
         path: "customers/:id",
         element: <CustomerDetails />,
       },
+      { path: "products", element: <Products /> },
+      { path: "products/create", element: <AddProductPage /> },
+      { path: "products/categories", element: <CategoriesPage /> },
+      { path: "products/discounts", element: <DiscountsPage /> },
       { path: "payments", element: <Payments /> },
       { path: "account", element: <ProfilePage /> },
       {
