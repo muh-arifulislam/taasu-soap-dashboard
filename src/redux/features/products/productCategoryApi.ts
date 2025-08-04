@@ -21,9 +21,9 @@ export const productCategoryApi = baseApi.injectEndpoints({
     getAllCategories: builder.query<
       ApiResponse<ProductCategory[]>,
       {
-        searchTerm: string;
-        isActive: string;
-        type: ProductCategoryType | "all";
+        searchTerm?: string;
+        isActive?: string;
+        type?: ProductCategoryType | "all";
       }
     >({
       query: ({ searchTerm, isActive, type }) => ({

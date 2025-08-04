@@ -40,6 +40,23 @@ export interface Product {
   deletedAt?: string;
 }
 
+export interface ProductFilterState {
+  searchTerm: string;
+  category: string;
+  priceRange: "$0-$20" | "$21-$40" | "$40+" | "";
+  stock: "in-stock" | "low-stock" | "out-of-stock" | "";
+  sortBy:
+    | "name-asc"
+    | "name-desc"
+    | "price-asc"
+    | "price-desc"
+    | "stock-asc"
+    | "stock-desc"
+    | "";
+  page: number;
+  limit: number;
+}
+
 export interface ProductDiscount {
   _id: string;
   name: string;

@@ -1,5 +1,5 @@
 import { baseApi } from "@/redux/api/baseApi";
-import type { ApiResponse, Product } from "@/types";
+import type { ApiResponse, Product, ProductFilterState } from "@/types";
 
 export const productApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -14,12 +14,19 @@ export const productApi = baseApi.injectEndpoints({
     }),
 
     // Read All with query filters
-    getAllProducts: builder.query<
-      ApiResponse<Product[]>,
-      { page?: number; limit?: number; categories?: string }
-    >({
-      query: ({ page = 1, limit = 9, categories = "" }) => ({
-        url: `product?page=${page}&limit=${limit}&categories=${categories}`,
+    getAllProducts: builder.query<ApiResponse<Product[]>, unknown>({
+      query: ({
+        page = 1,
+        limit = 12,
+        category = "",
+        stock = "",
+        sortBy = "name-asc",
+        priceRange = "",
+        searchTerm = "",
+      }: ProductFilterState) => ({
+        url: `product?page=${page}&limit=${limit}&categories=${
+          category === "all" ? "" : category
+        }&searchTerm=${searchTerm}&stock=${stock}&sortBy=${sortBy}&priceRange=${priceRange}`,
         method: "GET",
       }),
       providesTags: ["products"],

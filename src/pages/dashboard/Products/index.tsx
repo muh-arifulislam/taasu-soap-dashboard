@@ -16,6 +16,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -23,7 +24,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -57,6 +60,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useGetAllCategoriesQuery } from "@/redux/features/products/productCategoryApi";
 
 // Mock data - replace with actual API calls
 const mockProducts: Product[] = [
@@ -184,145 +188,38 @@ const mockProducts: Product[] = [
   },
 ];
 
-const categories = [
-  { _id: "1", name: "Skincare" },
-  { _id: "2", name: "Dry Skin" },
-  { _id: "3", name: "Lavender" },
-  { _id: "4", name: "Anti-Aging" },
-  { _id: "5", name: "Organic" },
-];
-
 export default function ProductsPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(12);
 
+  const [category, setCategory] = useState<string>("all");
+  const [priceRangeFilter, setPriceRangeFilter] = useState<string>("all");
+  const [stockFilter, setStockFilter] = useState<string>("all");
+  const [sorting, setSorting] = useState<string>("name-asc");
+
   const { data: response } = useGetAllProductsQuery({
     page,
     limit,
+    category,
+    sortBy: sorting,
   });
   const total = response?.meta?.total || 0;
   const totalPages = Math.ceil(total / limit);
 
+  const { data: categories } = useGetAllCategoriesQuery({
+    searchTerm: "",
+    type: "all",
+  });
+
   const [products, setProducts] = useState<Product[]>(mockProducts);
-  const [filteredProducts, setFilteredProducts] =
-    useState<Product[]>(mockProducts);
-  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [priceRangeFilter, setPriceRangeFilter] = useState<string>("all");
-  const [stockFilter, setStockFilter] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("name");
+
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
-  const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
   const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Filter and sort products
-  useEffect(() => {
-    let filtered = products.filter((product) => !product.deletedAt);
-
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (product) =>
-          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.categoryName.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Category filter
-    if (categoryFilter !== "all") {
-      filtered = filtered.filter(
-        (product) => product.categoryId === categoryFilter
-      );
-    }
-
-    // Price range filter
-    if (priceRangeFilter !== "all") {
-      filtered = filtered.filter((product) => {
-        switch (priceRangeFilter) {
-          case "low":
-            return product.price <= 20;
-          case "medium":
-            return product.price > 20 && product.price <= 40;
-          case "high":
-            return product.price > 40;
-          default:
-            return true;
-        }
-      });
-    }
-
-    // Stock filter
-    if (stockFilter !== "all") {
-      filtered = filtered.filter((product) => {
-        switch (stockFilter) {
-          case "in-stock":
-            return product.inventory.quantity > 10;
-          case "low-stock":
-            return (
-              product.inventory.quantity > 0 && product.inventory.quantity <= 10
-            );
-          case "out-of-stock":
-            return product.inventory.quantity === 0;
-          default:
-            return true;
-        }
-      });
-    }
-
-    // Sort products
-    filtered.sort((a, b) => {
-      let aValue: any = a[sortBy as keyof Product];
-      let bValue: any = b[sortBy as keyof Product];
-
-      if (sortBy === "price") {
-        aValue = Number(aValue);
-        bValue = Number(bValue);
-      } else if (sortBy === "stock") {
-        aValue = a.inventory.quantity;
-        bValue = b.inventory.quantity;
-      } else if (typeof aValue === "string") {
-        aValue = aValue.toLowerCase();
-        bValue = bValue.toLowerCase();
-      }
-
-      if (sortOrder === "asc") {
-        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-      } else {
-        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
-      }
-    });
-
-    setFilteredProducts(filtered);
-  }, [
-    products,
-    searchTerm,
-    categoryFilter,
-    priceRangeFilter,
-    stockFilter,
-    sortBy,
-    sortOrder,
-  ]);
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedProducts(filteredProducts.map((product) => product._id));
-    } else {
-      setSelectedProducts([]);
-    }
-  };
-
-  const handleSelectProduct = (productId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedProducts((prev) => [...prev, productId]);
-    } else {
-      setSelectedProducts((prev) => prev.filter((id) => id !== productId));
-    }
-  };
 
   const handleDeleteProduct = async (productId: string) => {
     setIsLoading(true);
@@ -345,27 +242,6 @@ export default function ProductsPage() {
     }
   };
 
-  const handleBulkDelete = async () => {
-    setIsLoading(true);
-    try {
-      const timestamp = new Date().toISOString();
-      setProducts((prev) =>
-        prev.map((product) =>
-          selectedProducts.includes(product._id)
-            ? { ...product, deletedAt: timestamp }
-            : product
-        )
-      );
-      toast(`${selectedProducts.length} products have been moved to trash.`);
-      setSelectedProducts([]);
-    } catch (error) {
-      toast("There was an error deleting the products.");
-    } finally {
-      setIsLoading(false);
-      setIsBulkDeleteDialogOpen(false);
-    }
-  };
-
   const getStockStatus = (quantity: number) => {
     if (quantity === 0)
       return {
@@ -384,37 +260,6 @@ export default function ProductsPage() {
       color: "bg-green-100 text-green-800",
       icon: CheckCircle,
     };
-  };
-
-  const getPriceAfterDiscount = (price: number, discountPercent?: number) => {
-    if (!discountPercent) return price;
-    return price - (price * discountPercent) / 100;
-  };
-
-  const exportProducts = () => {
-    // Simple CSV export
-    const headers = ["Name", "SKU", "Price", "Category", "Stock", "Sold"];
-    const csvContent = [
-      headers.join(","),
-      ...filteredProducts.map((product) =>
-        [
-          `"${product.name}"`,
-          product.sku,
-          product.price,
-          `"${product.categoryName}"`,
-          product.inventory.quantity,
-          product.inventory.sold,
-        ].join(",")
-      ),
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "products.csv";
-    a.click();
-    window.URL.revokeObjectURL(url);
   };
 
   // 🧠 Memoize heavy DataTable
@@ -441,80 +286,11 @@ export default function ProductsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={exportProducts}>
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
           <Button>
             <Plus className="h-4 w-4 mr-2" />
             Add Product
           </Button>
         </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Products
-            </CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {products.filter((p) => !p.deletedAt).length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Low Stock</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {
-                products.filter(
-                  (p) =>
-                    !p.deletedAt &&
-                    p.inventory.quantity <= 10 &&
-                    p.inventory.quantity > 0
-                ).length
-              }
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Out of Stock</CardTitle>
-            <XCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {
-                products.filter(
-                  (p) => !p.deletedAt && p.inventory.quantity === 0
-                ).length
-              }
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Value</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              $
-              {products
-                .filter((p) => !p.deletedAt)
-                .reduce((sum, p) => sum + p.price * p.inventory.quantity, 0)
-                .toFixed(2)}
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Filters and Search */}
@@ -535,14 +311,14 @@ export default function ProductsPage() {
                 />
               </div>
             </div>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <Select value={category} onValueChange={setCategory}>
               <SelectTrigger className="w-full lg:w-[180px]">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category._id} value={category._id}>
+                {categories?.data?.map((category) => (
+                  <SelectItem key={category._id} value={category.name}>
                     {category.name}
                   </SelectItem>
                 ))}
@@ -557,9 +333,9 @@ export default function ProductsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Prices</SelectItem>
-                <SelectItem value="low">$0 - $20</SelectItem>
-                <SelectItem value="medium">$21 - $40</SelectItem>
-                <SelectItem value="high">$40+</SelectItem>
+                <SelectItem value="$0-$20">$0 - $20</SelectItem>
+                <SelectItem value="$21-$40">$21 - $40</SelectItem>
+                <SelectItem value="$40+">$40+</SelectItem>
               </SelectContent>
             </Select>
             <Select value={stockFilter} onValueChange={setStockFilter}>
@@ -573,14 +349,7 @@ export default function ProductsPage() {
                 <SelectItem value="out-of-stock">Out of Stock</SelectItem>
               </SelectContent>
             </Select>
-            <Select
-              value={`${sortBy}-${sortOrder}`}
-              onValueChange={(value) => {
-                const [field, order] = value.split("-");
-                setSortBy(field);
-                setSortOrder(order as "asc" | "desc");
-              }}
-            >
+            <Select value={sorting} onValueChange={setSorting}>
               <SelectTrigger className="w-full lg:w-[180px]">
                 <SelectValue placeholder="Sort By" />
               </SelectTrigger>
@@ -597,85 +366,79 @@ export default function ProductsPage() {
         </CardContent>
       </Card>
 
-      {/* Bulk Actions */}
-      {selectedProducts.length > 0 && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                {selectedProducts.length} product
-                {selectedProducts.length > 1 ? "s" : ""} selected
-              </span>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setSelectedProducts([])}
-                >
-                  Clear Selection
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => setIsBulkDeleteDialogOpen(true)}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Selected
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Products Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Products ({filteredProducts.length})</CardTitle>
+          <CardTitle>Products</CardTitle>
           <CardDescription>
             A list of all products in your inventory.
           </CardDescription>
         </CardHeader>
         <CardContent>{renderedTable}</CardContent>
-        {totalPages > 1 && (
-          <Pagination className="mt-4">
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                  className={page <= 1 ? "pointer-events-none opacity-50" : ""}
-                />
-              </PaginationItem>
 
-              {Array.from({ length: totalPages }).map((_, idx) => {
-                const pageNumber = idx + 1;
-                return (
-                  <PaginationItem key={pageNumber}>
-                    <button
-                      onClick={() => setPage(pageNumber)}
-                      className={`px-3 py-1 rounded-md ${
-                        page === pageNumber
-                          ? "bg-primary text-white"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {pageNumber}
-                    </button>
+        <CardFooter className="flex items-center justify-end">
+          {totalPages > 1 && (
+            <div>
+              <Pagination className="">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                      className={
+                        page <= 1 ? "pointer-events-none opacity-50" : ""
+                      }
+                    />
                   </PaginationItem>
-                );
-              })}
 
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() =>
-                    setPage((prev) => Math.min(totalPages, prev + 1))
-                  }
-                  className={
-                    page >= totalPages ? "pointer-events-none opacity-50" : ""
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        )}
+                  {Array.from({ length: totalPages }).map((_, idx) => {
+                    const pageNumber = idx + 1;
+                    return (
+                      <PaginationItem key={pageNumber}>
+                        <button
+                          onClick={() => setPage(pageNumber)}
+                          className={`px-3 py-1 rounded-md ${
+                            page === pageNumber
+                              ? "bg-primary text-white"
+                              : "text-muted-foreground"
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      </PaginationItem>
+                    );
+                  })}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() =>
+                        setPage((prev) => Math.min(totalPages, prev + 1))
+                      }
+                      className={
+                        page >= totalPages
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+          <Select
+            value={String(limit)}
+            onValueChange={(value) => setLimit(Number(value))}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select a fruit" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="12">12 / page</SelectItem>
+              <SelectItem value="24">24 / page</SelectItem>
+              <SelectItem value="48">48 / page</SelectItem>
+              <SelectItem value="100">100 / page</SelectItem>
+            </SelectContent>
+          </Select>
+        </CardFooter>
       </Card>
 
       {/* Product Details Dialog */}
@@ -834,29 +597,6 @@ export default function ProductsPage() {
               disabled={isLoading}
             >
               {isLoading ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Bulk Delete Confirmation Dialog */}
-      <AlertDialog
-        open={isBulkDeleteDialogOpen}
-        onOpenChange={setIsBulkDeleteDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Multiple Products</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action will move {selectedProducts.length} product
-              {selectedProducts.length > 1 ? "s" : ""} to trash. You can restore
-              them later if needed.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleBulkDelete} disabled={isLoading}>
-              {isLoading ? "Deleting..." : "Delete All"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
