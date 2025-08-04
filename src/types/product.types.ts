@@ -43,7 +43,7 @@ export interface Product {
 export interface ProductFilterState {
   searchTerm: string;
   category: string;
-  priceRange: "$0-$20" | "$21-$40" | "$40+" | "";
+  priceRange: "$0-$20" | "$21-$40" | "$40" | "";
   stock: "in-stock" | "low-stock" | "out-of-stock" | "";
   sortBy:
     | "name-asc"

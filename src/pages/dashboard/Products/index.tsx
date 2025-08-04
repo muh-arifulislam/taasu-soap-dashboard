@@ -193,7 +193,7 @@ export default function ProductsPage() {
   const [limit, setLimit] = useState(12);
 
   const [category, setCategory] = useState<string>("all");
-  const [priceRangeFilter, setPriceRangeFilter] = useState<string>("all");
+  const [priceRange, setPriceRange] = useState<string>("all");
   const [stockFilter, setStockFilter] = useState<string>("all");
   const [sorting, setSorting] = useState<string>("name-asc");
 
@@ -202,6 +202,8 @@ export default function ProductsPage() {
     limit,
     category,
     sortBy: sorting,
+    priceRange,
+    stock: stockFilter,
   });
   const total = response?.meta?.total || 0;
   const totalPages = Math.ceil(total / limit);
@@ -325,8 +327,10 @@ export default function ProductsPage() {
               </SelectContent>
             </Select>
             <Select
-              value={priceRangeFilter}
-              onValueChange={setPriceRangeFilter}
+              value={priceRange}
+              onValueChange={(value) => {
+                setPriceRange(value);
+              }}
             >
               <SelectTrigger className="w-full lg:w-[180px]">
                 <SelectValue placeholder="Price Range" />
@@ -335,7 +339,7 @@ export default function ProductsPage() {
                 <SelectItem value="all">All Prices</SelectItem>
                 <SelectItem value="$0-$20">$0 - $20</SelectItem>
                 <SelectItem value="$21-$40">$21 - $40</SelectItem>
-                <SelectItem value="$40+">$40+</SelectItem>
+                <SelectItem value="$40">$40+</SelectItem>
               </SelectContent>
             </Select>
             <Select value={stockFilter} onValueChange={setStockFilter}>
