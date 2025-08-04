@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -129,7 +130,7 @@ export default function AddProductPage() {
     append: appendDescription,
     remove: removeDescription,
   } = useFieldArray({
-    control: form.control,
+    control: form.control as any,
     name: "descriptions",
   });
 
@@ -138,7 +139,7 @@ export default function AddProductPage() {
     append: appendAdvantage,
     remove: removeAdvantage,
   } = useFieldArray({
-    control: form.control,
+    control: form.control as any,
     name: "advantages",
   });
 
@@ -147,7 +148,7 @@ export default function AddProductPage() {
     append: appendIngredient,
     remove: removeIngredient,
   } = useFieldArray({
-    control: form.control,
+    control: form.control as any,
     name: "ingredients",
   });
 
@@ -156,7 +157,7 @@ export default function AddProductPage() {
     append: appendImage,
     remove: removeImage,
   } = useFieldArray({
-    control: form.control,
+    control: form.control as any,
     name: "images",
   });
 

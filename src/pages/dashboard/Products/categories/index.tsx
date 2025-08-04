@@ -1,5 +1,3 @@
-import type React from "react";
-
 import { useState, useEffect, useMemo } from "react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
