@@ -1,8 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Edit, Eye, MoreHorizontal, Trash2 } from "lucide-react";
 
-import type { Product } from "@/types";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,15 +11,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface ProductActionCellProps {
-  data: Product;
   handleEdit: () => void;
   handleDelete: () => void;
+  handleViewProduct: () => void;
 }
 
 export const ProductActionCell: React.FC<ProductActionCellProps> = ({
-  data,
-  handleEdit,
-  handleDelete,
+  handleViewProduct,
 }) => {
   return (
     <DropdownMenu>
@@ -32,8 +28,8 @@ export const ProductActionCell: React.FC<ProductActionCellProps> = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        {/* onClick={() => setViewingProduct(product)} */}
-        <DropdownMenuItem>
+
+        <DropdownMenuItem onClick={handleViewProduct}>
           <Eye className="h-4 w-4 mr-2" />
           View Details
         </DropdownMenuItem>

@@ -30,6 +30,29 @@ const data = {
   },
   navMain: [
     {
+      title: "Products",
+      url: "#",
+      icon: Box,
+      items: [
+        {
+          title: "Products List",
+          url: "/dashboard/products",
+        },
+        {
+          title: "Add Product",
+          url: "/dashboard/products/create",
+        },
+        {
+          title: "Manage Categories",
+          url: "/dashboard/products/categories",
+        },
+        {
+          title: "Manage Discounts",
+          url: "/dashboard/products/discounts",
+        },
+      ],
+    },
+    {
       title: "Orders",
       url: "#",
       icon: ShoppingCart,
@@ -60,29 +83,6 @@ const data = {
         {
           title: "List",
           url: "/dashboard/payments",
-        },
-      ],
-    },
-    {
-      title: "Products",
-      url: "#",
-      icon: Box,
-      items: [
-        {
-          title: "Products List",
-          url: "/dashboard/products",
-        },
-        {
-          title: "Add Product",
-          url: "/dashboard/products/create",
-        },
-        {
-          title: "Manage Categories",
-          url: "/dashboard/products/categories",
-        },
-        {
-          title: "Manage Discounts",
-          url: "/dashboard/products/discounts",
         },
       ],
     },

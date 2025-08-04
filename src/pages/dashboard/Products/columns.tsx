@@ -1,9 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Product } from "@/types";
 import type { ColumnDef } from "@tanstack/react-table";
-
-import dayjs from "dayjs";
-
 import { ProductActionCell } from "./action-cell";
 import { Badge } from "@/components/ui/badge";
 
@@ -15,7 +12,7 @@ import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 interface ColumnActions {
   handleEdit: (discount: Product) => void;
   handleDelete: (discountId: string) => void;
-  toggleStatus: (discountId: string) => void;
+  handleViewProduct: (product: Product) => void;
 }
 
 const getDiscountColor = (percent: number) => {
@@ -207,12 +204,12 @@ export const columns = (actions: ColumnActions): ColumnDef<Product>[] => [
     enableHiding: false,
     header: "Actions",
     cell: ({ row }) => {
-      const discount = row.original;
+      const product = row.original;
       return (
         <ProductActionCell
-          data={discount}
-          handleEdit={() => actions.handleEdit(discount)}
-          handleDelete={() => actions.handleDelete(discount._id)}
+          handleEdit={() => actions.handleEdit(product)}
+          handleDelete={() => actions.handleDelete(product._id)}
+          handleViewProduct={() => actions.handleViewProduct(product)}
         />
       );
     },
