@@ -224,7 +224,10 @@ export default function ProductsPage() {
       {/* Products Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Products</CardTitle>
+          <CardTitle>
+            Products
+            <span>0 out of 100</span>
+          </CardTitle>
           <CardDescription>
             A list of all products in your inventory.
           </CardDescription>

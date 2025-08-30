@@ -5,6 +5,7 @@ import { ProductActionCell } from "./action-cell";
 import { Badge } from "@/components/ui/badge";
 
 import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -74,15 +75,18 @@ export const columns = (actions: ColumnActions): ColumnDef<Product>[] => [
     header: "Name",
     cell: ({ row }) => {
       const product = row.original;
+
       return (
         <div className="flex items-center gap-3">
-          <img
-            src={
-              "https://res.cloudinary.com/dmiorpsf7/image/upload/v1738833868/taasu-soap-website/Org-Home-2_dbwagp.jpg"
-            }
+          {/* <img
+            src={placeholder}
             alt={product.name}
             className="h-10 w-10 rounded-md object-cover"
-          />
+          /> */}
+          <Avatar className="rounded">
+            <AvatarImage src={product?.images[0]} alt="Product" />
+            <AvatarFallback className="rounded">N/A</AvatarFallback>
+          </Avatar>
           <div>
             <div className="font-medium">{product.name}</div>
             <div className="text-sm text-muted-foreground">
