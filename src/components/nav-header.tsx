@@ -1,4 +1,11 @@
-import { BadgeCheck, LogOut, Moon, Sun } from "lucide-react";
+import {
+  BadgeCheck,
+  Bell,
+  LogOut,
+  MessageCircle,
+  Moon,
+  Sun,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -35,8 +42,18 @@ export default function NavHeader({
   const { setTheme } = useTheme();
 
   return (
-    <header className="flex items-center justify-between px-4 py-3 bg-background">
+    <div className="flex items-center justify-between px-4 py-3">
       <div className="flex items-center gap-3">
+        <div>
+          <Button variant="outline" size="icon">
+            <MessageCircle />
+          </Button>
+        </div>
+        <div>
+          <Button variant="outline" size="icon">
+            <Bell className="h-[1.2rem] w-[1.2rem] transition-all" />
+          </Button>
+        </div>
         <div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -100,6 +117,6 @@ export default function NavHeader({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </header>
+    </div>
   );
 }

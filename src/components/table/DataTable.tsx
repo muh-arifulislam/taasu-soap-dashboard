@@ -1,4 +1,3 @@
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -19,7 +18,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
 }
 
-export function ProductDataTable<TData, TValue>({
+export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -32,25 +31,22 @@ export function ProductDataTable<TData, TValue>({
   return (
     <Table>
       <TableHeader>
-        <TableRow>
-          <TableHead className="w-12">
-            <Checkbox
-            //   checked={
-            //     selectedProducts.length === filteredProducts.length &&
-            //     filteredProducts.length > 0
-            //   }
-            //   onCheckedChange={handleSelectAll}
-            />
-          </TableHead>
-          <TableHead>Product</TableHead>
-          <TableHead>SKU</TableHead>
-          <TableHead>Category</TableHead>
-          <TableHead>Price</TableHead>
-          <TableHead>Stock</TableHead>
-          <TableHead>Sold</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
+        {table.getHeaderGroups().map((headerGroup) => (
+          <TableRow key={headerGroup.id}>
+            {headerGroup.headers.map((header) => {
+              return (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                </TableHead>
+              );
+            })}
+          </TableRow>
+        ))}
       </TableHeader>
       <TableBody>
         {table.getRowModel().rows?.length ? (

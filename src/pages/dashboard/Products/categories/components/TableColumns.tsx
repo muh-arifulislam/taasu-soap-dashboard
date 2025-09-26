@@ -2,10 +2,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import type { ProductCategory } from "@/types";
 import type { ColumnDef } from "@tanstack/react-table";
 import dayjs from "dayjs";
-import { CategoryActionCell } from "./action-cell";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
+import { CategoryActionCell } from "./ColumnsActionCell";
 
 interface ColumnActions {
   handleEdit: (category: ProductCategory) => void;

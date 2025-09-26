@@ -22,14 +22,35 @@ export const productCategoryApi = baseApi.injectEndpoints({
       ApiResponse<ProductCategory[]>,
       {
         searchTerm?: string;
-        isActive?: string;
+        activeStatus?: string;
         type?: ProductCategoryType | "all";
+
+        page?: number;
+        limit?: number;
+        sortBy?: string;
       }
     >({
-      query: ({ searchTerm, isActive, type }) => ({
-        method: "GET",
-        url: `categories?searchTerm=${searchTerm}&status=${isActive}&type=${type}`,
-      }),
+      query: ({ searchTerm, activeStatus, type, page, limit, sortBy }) => {
+        const params = new URLSearchParams();
+
+        if (searchTerm) params.append("search", searchTerm);
+        // if (isActive) params.append("status", isActive);
+        if (type && type !== "all") params.append("type", type);
+        if (page) params.append("page", page.toString());
+        if (limit) params.append("limit", limit.toString());
+        if (sortBy) params.append("sort", sortBy);
+
+        if (activeStatus === "active") {
+          params.append("isActive", "true");
+        } else if (activeStatus === "inactive") {
+          params.append("isActive", "false");
+        }
+
+        return {
+          method: "GET",
+          url: `categories?${params.toString()}`,
+        };
+      },
       providesTags: ["productCategories"],
     }),
 

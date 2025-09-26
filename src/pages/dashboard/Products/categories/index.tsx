@@ -1,387 +1,206 @@
-import { useState, useEffect, useMemo } from "react";
-import { Plus, Search } from "lucide-react";
+import { useState, useMemo, useCallback } from "react";
+import { Plus, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 
 import { toast } from "sonner";
 
-import type { ProductCategory, ProductCategoryType } from "@/types";
+import type { ProductCategory } from "@/types";
 
-import { useDebouncedInput } from "@/hooks/useDebouncedInput";
-import { columns } from "./columns";
-import { CategoryDataTable } from "./data-table";
+import { useGetAllCategoriesQuery } from "@/redux/features/products/productCategoryApi";
+
+import DataTablePageSkeleton from "@/components/DataTablePageSkeleton";
+
+import { usePagination } from "@/hooks/usePagination";
+import { Pagination } from "@/components/pagination";
 import {
-  useCreateCategoryMutation,
-  useDeleteCategoryMutation,
-  useGetAllCategoriesQuery,
-  useUpdateCategoryMutation,
-} from "@/redux/features/products/productCategoryApi";
-import { PRODUCT_CATEGORY_TYPES } from "./constant";
+  useCategoryFilters,
+  useCategoryForm,
+  useCategoryOperations,
+} from "./hooks";
+import { CategoryFilters } from "./components/CategoryFilters";
+import { CategoryFormDialog } from "./components/CategoryFormDialog";
 
-import { z } from "zod";
+import DataTableSkeleton from "@/components/data-table-skeleton";
+import type { CategoryFormData } from "./validation";
+import { DataTable } from "@/components/table/DataTable";
+import { columns } from "./components/TableColumns";
 
-import { useForm, type SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-// Fixed schema - removed "all" from the enum as it's not a valid ProductCategoryType
-const categorySchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  slug: z.string().min(1, "Slug is required"),
-  type: z.enum(
-    PRODUCT_CATEGORY_TYPES.map((type) => type.value) as [string, ...string[]]
-  ),
-  isActive: z.boolean(),
-});
-
-export type CategorySchema = z.infer<typeof categorySchema>;
-
-export default function DiscountsPage() {
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    reset,
-    watch,
-    formState: { errors },
-  } = useForm<CategorySchema>({
-    resolver: zodResolver(categorySchema),
-    defaultValues: {
-      name: "",
-      slug: "",
-      type: PRODUCT_CATEGORY_TYPES[0]?.value || "type",
-      isActive: true,
-    },
-  });
-
-  const [createCategory] = useCreateCategoryMutation();
-  const [updateCategory] = useUpdateCategoryMutation();
-  const [deleteCategory] = useDeleteCategoryMutation();
-
-  const {
-    searchTerm,
-    debouncedSearchTerm,
-    handleInputChange,
-    debouncedSetter,
-  } = useDebouncedInput();
-
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [categoryType, setCategoryType] = useState<ProductCategoryType | "all">(
-    "all"
-  );
-
-  const { data: response } = useGetAllCategoriesQuery({
-    searchTerm: debouncedSearchTerm,
-    isActive: statusFilter,
-    type: categoryType,
-  });
-
-  // Cancel debounce on unmount
-  useEffect(() => {
-    return () => {
-      debouncedSetter.cancel();
-    };
-  }, [debouncedSetter]);
+export default function CategoriesPage() {
+  const pagination = usePagination();
+  const filters = useCategoryFilters();
+  const operations = useCategoryOperations();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] =
     useState<ProductCategory | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Filter discounts based on search and filters
+  const form = useCategoryForm(editingCategory);
 
-  const resetForm = () => {
-    reset({
-      name: "",
-      slug: "",
-      type: PRODUCT_CATEGORY_TYPES[0]?.value || "type",
-      isActive: true,
-    });
-    setEditingCategory(null);
-  };
+  const {
+    data: response,
+    isLoading: isLoadingCategories,
+    refetch,
+    isFetching,
+  } = useGetAllCategoriesQuery({
+    searchTerm: filters.debouncedSearchTerm,
+    activeStatus: filters.statusFilter,
+    type: filters.categoryType,
+    page: pagination.page,
+    limit: pagination.limit,
+    sortBy: filters.sorting,
+  });
 
-  const onSubmit: SubmitHandler<CategorySchema> = async (data) => {
-    setIsLoading(true);
+  //pagination
+  const total = response?.meta?.total || 0;
+  const totalPages = Math.ceil(total / pagination.limit);
 
-    try {
-      if (editingCategory) {
-        await updateCategory({
-          id: editingCategory._id,
-          data,
-        }).unwrap();
-        toast.success("The category has been updated successfully.");
-      } else {
-        await createCategory(data).unwrap();
-        toast.success("The category has been created successfully.");
+  // Event handlers
+  const handleFormSubmit = useCallback(
+    async (data: CategoryFormData) => {
+      setIsLoading(true);
+      try {
+        if (editingCategory) {
+          await operations.handleUpdate(editingCategory._id, data);
+        } else {
+          await operations.handleCreate(data);
+        }
+        setIsAddDialogOpen(false);
+        form.resetForm();
+        setEditingCategory(null);
+      } catch (error) {
+        console.error(error);
+        toast.error("There was an error saving the category.");
+      } finally {
+        setIsLoading(false);
       }
+    },
+    [editingCategory, operations, form]
+  );
 
-      setIsAddDialogOpen(false);
-      resetForm();
-    } catch (error) {
-      console.error(error);
-      toast.error("There was an error saving the category.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const handleDelete = useCallback(
+    async (categoryId: string) => {
+      try {
+        await operations.handleDelete(categoryId);
+      } catch (error) {
+        console.error(error);
+        toast.error("There was an error deleting the category.");
+      }
+    },
+    [operations]
+  );
 
-  const handleEdit = (category: ProductCategory) => {
-    setEditingCategory(category);
-    reset({
-      name: category.name,
-      slug: category.slug,
-      type: category.type,
-      isActive: category.isActive,
-    });
-    setIsAddDialogOpen(true);
-  };
+  const handleEdit = useCallback(
+    (category: ProductCategory) => {
+      setEditingCategory(category);
+      form.populateForm(category);
+      setIsAddDialogOpen(true);
+    },
+    [form]
+  );
 
-  const handleDelete = async (categoryId: string) => {
-    try {
-      await deleteCategory(categoryId).unwrap();
-      toast.success("The category has been deleted successfully.");
-    } catch (error) {
-      console.error(error);
-      toast.error("There was an error deleting the category.");
-    }
-  };
-
-  const toggleStatus = async (categoryId: string) => {
-    try {
+  const handleToggleStatus = useCallback(
+    async (categoryId: string) => {
       const category = response?.data.find((d) => d._id === categoryId);
       if (!category) return;
 
-      await updateCategory({
-        id: categoryId,
-        data: {
-          ...category,
-          isActive: !category.isActive,
-        },
-      }).unwrap();
+      try {
+        await operations.handleToggleStatus(category);
+      } catch (error) {
+        console.error(error);
+        toast.error("There was an error updating the status.");
+      }
+    },
+    [response?.data, operations]
+  );
 
-      toast.success("The category status has been updated.");
-    } catch (error) {
-      console.error(error);
-      toast.error("There was an error updating the status.");
-    }
-  };
+  const handleAddNew = useCallback(() => {
+    form.resetForm();
+    setEditingCategory(null);
+    setIsAddDialogOpen(true);
+  }, [form]);
 
-  // 🧠 Memoize heavy DataTable
   const renderedTable = useMemo(() => {
     return (
-      <CategoryDataTable<ProductCategory, unknown>
+      <DataTable<ProductCategory, unknown>
         columns={columns({
           handleDelete,
           handleEdit,
-          toggleStatus,
+          toggleStatus: handleToggleStatus,
         })}
         data={response?.data || []}
       />
     );
-  }, [response?.data]);
+  }, [response?.data, handleDelete, handleEdit, handleToggleStatus]);
+
+  if (isLoadingCategories) {
+    return <DataTablePageSkeleton />;
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Product Categories
-          </h1>
-          <p className="text-muted-foreground">
-            Manage your product categories
-          </p>
-        </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Category
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>
-                {editingCategory ? "Edit Category" : "Add New Category"}
-              </DialogTitle>
-              <DialogDescription>
-                {editingCategory
-                  ? "Update the category details."
-                  : "Create a new product category."}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name *</Label>
-                  <Input
-                    id="name"
-                    {...register("name")}
-                    placeholder="Enter category name"
-                  />
-                  {errors.name && (
-                    <p className="text-sm text-red-500">
-                      {errors.name.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="slug">Slug *</Label>
-                  <Input
-                    id="slug"
-                    {...register("slug")}
-                    placeholder="Enter category slug"
-                  />
-                  {errors.slug && (
-                    <p className="text-sm text-red-500">
-                      {errors.slug.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Type *</Label>
-                  <Select
-                    value={watch("type")}
-                    onValueChange={(value) =>
-                      setValue("type", value as ProductCategoryType)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PRODUCT_CATEGORY_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          <span>{type.label}</span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.type && (
-                    <p className="text-sm text-red-500">
-                      {errors.type.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="isActive"
-                    checked={watch("isActive")}
-                    onCheckedChange={(checked) => setValue("isActive", checked)}
-                  />
-                  <Label htmlFor="isActive">Active</Label>
-                </div>
-              </div>
-
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsAddDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading
-                    ? "Saving..."
-                    : editingCategory
-                    ? "Update"
-                    : "Create"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search discounts..."
-                  value={searchTerm}
-                  onChange={handleInputChange}
-                  className="pl-8"
-                />
-              </div>
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select
-              value={categoryType}
-              onValueChange={(value) =>
-                setCategoryType(value as ProductCategoryType | "all")
-              }
+      <Card className="rounded-md shadow-none mb-1">
+        <CardContent className="flex flex-col lg:flex-row gap-4 justify-between">
+          <CategoryFilters filters={filters} />
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => refetch()}
+              variant="outline"
+              disabled={isFetching}
             >
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                {PRODUCT_CATEGORY_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <RefreshCw className={`${isFetching ? "animate-spin" : ""}`} />
+              Refetch
+            </Button>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={handleAddNew}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Category
+                </Button>
+              </DialogTrigger>
+              <CategoryFormDialog
+                open={isAddDialogOpen}
+                onOpenChange={setIsAddDialogOpen}
+                form={form}
+                editingCategory={editingCategory}
+                onSubmit={handleFormSubmit}
+                isLoading={isLoading}
+              />
+            </Dialog>
           </div>
         </CardContent>
       </Card>
 
       {/* Discounts Table */}
-      <Card>
+      <Card className="rounded-md shadow-none mb-1">
         <CardHeader>
           <CardTitle>Categories</CardTitle>
           <CardDescription>
             A list of all product categories in your store.
           </CardDescription>
         </CardHeader>
-        <CardContent>{renderedTable}</CardContent>
+        <CardContent>
+          {isFetching ? <DataTableSkeleton /> : renderedTable}
+        </CardContent>
+        <CardFooter className="w-full">
+          <Pagination
+            pagination={pagination}
+            totalPages={totalPages}
+            total={total}
+            loading={isFetching}
+          />
+        </CardFooter>
       </Card>
     </div>
   );

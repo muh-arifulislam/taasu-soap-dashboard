@@ -26,7 +26,7 @@ export const productApi = baseApi.injectEndpoints({
       }: ProductFilterState) => ({
         url: `product?page=${page}&limit=${limit}&categories=${
           category === "all" ? "" : category
-        }&searchTerm=${searchTerm}&stock=${stock}&sortBy=${sortBy}&priceRange=${priceRange}`,
+        }&search=${searchTerm}&stock=${stock}&sortBy=${sortBy}&priceRange=${priceRange}`,
         method: "GET",
       }),
       providesTags: ["products"],

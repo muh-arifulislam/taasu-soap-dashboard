@@ -17,6 +17,7 @@ import ProfilePage from "@/pages/dashboard/Profile";
 import Users from "@/pages/dashboard/Users";
 import CreateUserPage from "@/pages/dashboard/Users/Create";
 import { createBrowserRouter, Navigate } from "react-router-dom";
+import InventoriesPage from "@/pages/dashboard/Inventories";
 
 export const router = createBrowserRouter([
   {
@@ -48,6 +49,10 @@ export const router = createBrowserRouter([
       {
         path: "orders",
         element: <Orders />,
+      },
+      {
+        path: "inventories",
+        element: <InventoriesPage />,
       },
       {
         path: "orders/:id",

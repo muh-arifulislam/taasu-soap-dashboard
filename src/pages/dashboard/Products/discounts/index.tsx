@@ -1,7 +1,7 @@
 import type React from "react";
 
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Search, Eye, Percent } from "lucide-react";
+import { Plus, Search, Percent, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -44,6 +44,7 @@ import type { ProductDiscount } from "@/types";
 import { DiscountDataTables } from "./data-table";
 import { columns } from "./columns";
 import { useDebouncedInput } from "@/hooks/useDebouncedInput";
+import DataTablePageSkeleton from "@/components/DataTablePageSkeleton";
 
 export default function DiscountsPage() {
   const [createDiscount] = useCreateDiscountMutation();
@@ -60,7 +61,12 @@ export default function DiscountsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [discountRangeFilter, setDiscountRangeFilter] = useState<string>("all");
 
-  const { data: response } = useGetAllDiscountsQuery({
+  const {
+    data: response,
+    isLoading: isLoadingDiscounts,
+    isFetching,
+    refetch,
+  } = useGetAllDiscountsQuery({
     searchTerm: debouncedSearchTerm,
     statusFilter,
     discountRangeFilter,
@@ -182,185 +188,23 @@ export default function DiscountsPage() {
     );
   }, [response?.data]);
 
+  if (isLoadingDiscounts) {
+    return <DataTablePageSkeleton />;
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Product Discounts
-          </h1>
-          <p className="text-muted-foreground">
-            Manage your product discounts and promotions
-          </p>
-        </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Discount
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>
-                {editingDiscount ? "Edit Discount" : "Add New Discount"}
-              </DialogTitle>
-              <DialogDescription>
-                {editingDiscount
-                  ? "Update the discount details."
-                  : "Create a new product discount."}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit}>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, name: e.target.value }))
-                    }
-                    placeholder="Enter discount name"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    }
-                    placeholder="Enter discount description"
-                    rows={3}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="discountPercent">Discount Percentage *</Label>
-                  <div className="relative">
-                    <Input
-                      id="discountPercent"
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      value={formData.discountPercent}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          discountPercent:
-                            Number.parseFloat(e.target.value) || 0,
-                        }))
-                      }
-                      placeholder="0"
-                      className="pr-8"
-                      required
-                    />
-                    <Percent className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="isActive"
-                    checked={formData.isActive}
-                    onCheckedChange={(checked) =>
-                      setFormData((prev) => ({ ...prev, isActive: checked }))
-                    }
-                  />
-                  <Label htmlFor="isActive">Active</Label>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsAddDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading
-                    ? "Saving..."
-                    : editingDiscount
-                    ? "Update"
-                    : "Create"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Discounts
-            </CardTitle>
-            <Percent className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{response?.data.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Active Discounts
-            </CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {response?.data.filter((d) => d.isActive).length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Average Discount
-            </CardTitle>
-            <Percent className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">30%</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Max Discount</CardTitle>
-            <Percent className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">30%</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search discounts..."
-                  value={searchTerm}
-                  onChange={handleInputChange}
-                  className="pl-8"
-                />
-              </div>
+      <Card className="rounded-md shadow-none mb-1">
+        <CardContent className="flex flex-col lg:flex-row gap-4 justify-between">
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search products..."
+                value={searchTerm}
+                onChange={handleInputChange}
+                className="pl-8 bg-accent"
+              />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-[180px]">
@@ -387,11 +231,130 @@ export default function DiscountsPage() {
               </SelectContent>
             </Select>
           </div>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => refetch()}
+              variant="outline"
+              disabled={isFetching}
+            >
+              <RefreshCw className={`${isFetching ? "animate-spin" : ""}`} />
+              Refetch
+            </Button>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={resetForm}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Discount
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingDiscount ? "Edit Discount" : "Add New Discount"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {editingDiscount
+                      ? "Update the discount details."
+                      : "Create a new product discount."}
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmit}>
+                  <div className="grid gap-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Name *</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
+                        placeholder="Enter discount name"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            description: e.target.value,
+                          }))
+                        }
+                        placeholder="Enter discount description"
+                        rows={3}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="discountPercent">
+                        Discount Percentage *
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="discountPercent"
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          value={formData.discountPercent}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              discountPercent:
+                                Number.parseFloat(e.target.value) || 0,
+                            }))
+                          }
+                          placeholder="0"
+                          className="pr-8"
+                          required
+                        />
+                        <Percent className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="isActive"
+                        checked={formData.isActive}
+                        onCheckedChange={(checked) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            isActive: checked,
+                          }))
+                        }
+                      />
+                      <Label htmlFor="isActive">Active</Label>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsAddDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isLoading}>
+                      {isLoading
+                        ? "Saving..."
+                        : editingDiscount
+                        ? "Update"
+                        : "Create"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </CardContent>
       </Card>
 
       {/* Discounts Table */}
-      <Card>
+      <Card className="rounded-md shadow-none mb-1">
         <CardHeader>
           <CardTitle>Discounts</CardTitle>
           <CardDescription>

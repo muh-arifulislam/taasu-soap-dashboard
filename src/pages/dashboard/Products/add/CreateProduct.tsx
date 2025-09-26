@@ -25,7 +25,6 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
 import { useGetAllCategoriesQuery } from "@/redux/features/products/productCategoryApi";
 import { useGetAllDiscountsQuery } from "@/redux/features/products/productDiscountApi";
@@ -72,6 +71,43 @@ const productFormSchema = z.object({
 
 type ProductFormData = z.infer<typeof productFormSchema>;
 
+// const DEFAULT_VALUES = {
+//   name: "Organic Lavender & Citrus Soap Bar 110g",
+//   sku: "lsc 1105",
+//   price: 3.99,
+//   descriptions: [
+//     "Combining revitalising Lavender with zingy Citrus, this little ray of sublime soapy sunshine will refresh, tone, cleanse and purify your skin, and add a spring to your step!",
+//     "Pure Organic bar soap made with the finest natural ingredients and pure Lavender & Orange essential oils. Perfect for bath, shower & sink.",
+//   ],
+//   advantages: [
+//     "Totally free from detergents, SLS, sulphates, alcohol, parabens, sorbates, silicones & synthetic preservatives",
+//     "Made from Natural Ingredients",
+//     "Plant based and 100% Vegan",
+//     "Leaping Bunny Cruelty Free",
+//     "Plastic Free, Eco Friendly and Biodegradable (soap and packaging)",
+//     "RSPO Certified Sustainable Palm Oil",
+//   ],
+//   ingredients: [
+//     "Sodium Palmate* (derived from sustainable Palm Oil), Sodium Cocoate (derived from Coconut Oil), Aqua (Water), Naturally Occurring Glycerin (Glycerine), Rose Geranium Essential Oil (Pelargonium Graveolens), Sodium Chloride (Salt), Sodium Citrate (sodium salt derived from citric acid), Limonene**, Linalool**",
+//     "*made from 100% RSPO certified sustainable Palm Oil and Palm Kernel Oil",
+//     "**allergen – naturally occurring within the essential oils",
+//     "Made with 85.8% certified Organic Oils.",
+//   ],
+//   addInformation: {
+//     weight: "0.125 kg",
+//     dimension: "8.8 × 5.9 × 3.7 cm",
+//     direction:
+//       "Use with warm water to create a luxurious, silky lather. Wash off. Suitable for face and body.",
+//     warnings:
+//       "Avoid contact with the eyes. If product enters the eyes rinse well with warm water.",
+//   },
+//   images: ["https://dev-arifulislam.netlify.app/"],
+//   categoryId: "",
+//   inventoryQuantity: 50,
+//   inventorySold: 0,
+//   discountId: null,
+// };
+
 export default function AddProductPage() {
   const { data: discounts } = useGetAllDiscountsQuery({
     searchTerm: "",
@@ -81,47 +117,31 @@ export default function AddProductPage() {
 
   const { data: categories } = useGetAllCategoriesQuery({
     searchTerm: "",
-    isActive: "active",
+    activeStatus: "active",
     type: "all",
+    limit: 100,
   });
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
-      name: "Organic Lavender & Citrus Soap Bar 110g",
-      sku: "lsc 1105",
-      price: 3.99,
-      descriptions: [
-        "Combining revitalising Lavender with zingy Citrus, this little ray of sublime soapy sunshine will refresh, tone, cleanse and purify your skin, and add a spring to your step!",
-        "Pure Organic bar soap made with the finest natural ingredients and pure Lavender & Orange essential oils. Perfect for bath, shower & sink.",
-      ],
-      advantages: [
-        "Totally free from detergents, SLS, sulphates, alcohol, parabens, sorbates, silicones & synthetic preservatives",
-        "Made from Natural Ingredients",
-        "Plant based and 100% Vegan",
-        "Leaping Bunny Cruelty Free",
-        "Plastic Free, Eco Friendly and Biodegradable (soap and packaging)",
-        "RSPO Certified Sustainable Palm Oil",
-      ],
-      ingredients: [
-        "Sodium Palmate* (derived from sustainable Palm Oil), Sodium Cocoate (derived from Coconut Oil), Aqua (Water), Naturally Occurring Glycerin (Glycerine), Rose Geranium Essential Oil (Pelargonium Graveolens), Sodium Chloride (Salt), Sodium Citrate (sodium salt derived from citric acid), Limonene**, Linalool**",
-        "*made from 100% RSPO certified sustainable Palm Oil and Palm Kernel Oil",
-        "**allergen – naturally occurring within the essential oils",
-        "Made with 85.8% certified Organic Oils.",
-      ],
-      addInformation: {
-        weight: "0.125 kg",
-        dimension: "8.8 × 5.9 × 3.7 cm",
-        direction:
-          "Use with warm water to create a luxurious, silky lather. Wash off. Suitable for face and body.",
-        warnings:
-          "Avoid contact with the eyes. If product enters the eyes rinse well with warm water.",
-      },
-      images: ["https://dev-arifulislam.netlify.app/"],
+      name: "",
+      sku: "",
+      price: 0,
+      descriptions: [""],
+      advantages: [""],
+      ingredients: [""],
+      images: [""],
       categoryId: "",
-      inventoryQuantity: 50,
+      inventoryQuantity: 0,
       inventorySold: 0,
       discountId: null,
+      addInformation: {
+        weight: "",
+        dimension: "",
+        direction: "",
+        warnings: "",
+      },
     },
   });
 
@@ -194,9 +214,11 @@ export default function AddProductPage() {
             Create a new product for your inventory
           </p>
         </div>
-        <Button variant="outline" onClick={() => form.reset()}>
-          Cancel
-        </Button>
+        <div className="space-x-2">
+          <Button variant="outline" onClick={() => form.reset()}>
+            Reset
+          </Button>
+        </div>
       </div>
 
       <Form {...form}>
@@ -220,7 +242,6 @@ export default function AddProductPage() {
                       <FormControl>
                         <Input placeholder="Enter product name" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -233,7 +254,6 @@ export default function AddProductPage() {
                       <FormControl>
                         <Input placeholder="Enter SKU" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -254,7 +274,6 @@ export default function AddProductPage() {
                         }
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -282,7 +301,7 @@ export default function AddProductPage() {
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
                         </FormControl>
@@ -299,7 +318,6 @@ export default function AddProductPage() {
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -316,7 +334,7 @@ export default function AddProductPage() {
                         value={field.value ?? "none"}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select a discount" />
                           </SelectTrigger>
                         </FormControl>
@@ -338,7 +356,6 @@ export default function AddProductPage() {
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -379,7 +396,6 @@ export default function AddProductPage() {
                           </Button>
                         )}
                       </div>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -431,7 +447,6 @@ export default function AddProductPage() {
                           </Button>
                         )}
                       </div>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -481,7 +496,6 @@ export default function AddProductPage() {
                           </Button>
                         )}
                       </div>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -517,7 +531,6 @@ export default function AddProductPage() {
                       <FormControl>
                         <Input placeholder="e.g., 100g, 250ml" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -533,7 +546,6 @@ export default function AddProductPage() {
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -550,7 +562,6 @@ export default function AddProductPage() {
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -566,7 +577,6 @@ export default function AddProductPage() {
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -606,7 +616,6 @@ export default function AddProductPage() {
                           </Button>
                         )}
                       </div>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -650,7 +659,6 @@ export default function AddProductPage() {
                           }
                         />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -671,7 +679,6 @@ export default function AddProductPage() {
                           }
                         />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />

@@ -53,6 +53,18 @@ const data = {
       ],
     },
     {
+      title: "Inventories",
+      url: "#",
+      icon: ShoppingCart,
+      isActive: false,
+      items: [
+        {
+          title: "List",
+          url: "/dashboard/inventories",
+        },
+      ],
+    },
+    {
       title: "Orders",
       url: "#",
       icon: ShoppingCart,
