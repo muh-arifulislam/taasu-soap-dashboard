@@ -28,13 +28,12 @@ import {
   useCategoryForm,
   useCategoryOperations,
 } from "./hooks";
-import { CategoryFilters } from "./components/CategoryFilters";
-import { CategoryFormDialog } from "./components/CategoryFormDialog";
 
 import DataTableSkeleton from "@/components/data-table-skeleton";
 import type { CategoryFormData } from "./validation";
 import { DataTable } from "@/components/table/DataTable";
-import { columns } from "./components/TableColumns";
+import { columns } from "./columns";
+import { CategoryFilters, CategoryFormDialog } from "./components";
 
 export default function CategoriesPage() {
   const pagination = usePagination();

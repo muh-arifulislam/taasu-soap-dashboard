@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
-import { CategoryActionCell } from "./ColumnsActionCell";
+import { CategoryActionCell } from "./components";
 
 interface ColumnActions {
   handleEdit: (category: ProductCategory) => void;
