@@ -20,7 +20,7 @@ export const productDiscountApi = baseApi.injectEndpoints({
     >({
       query: ({ searchTerm, statusFilter, discountRangeFilter }) => ({
         method: "GET",
-        url: `product-discounts?searchTerm=${searchTerm}&status=${statusFilter}&discountRange=${discountRangeFilter}`,
+        url: `product-discounts?search=${searchTerm}&isActive=${statusFilter}&discountRange=${discountRangeFilter}`,
       }),
       providesTags: ["productDiscounts"],
     }),

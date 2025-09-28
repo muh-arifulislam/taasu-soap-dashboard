@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -41,12 +42,16 @@ import {
   useUpdateDiscountMutation,
 } from "@/redux/features/products/productDiscountApi";
 import type { ProductDiscount } from "@/types";
-import { DiscountDataTables } from "./data-table";
 import { columns } from "./columns";
 import { useDebouncedInput } from "@/hooks/useDebouncedInput";
 import DataTablePageSkeleton from "@/components/DataTablePageSkeleton";
+import { DataTable } from "@/components/table/DataTable";
+import { Pagination } from "@/components/pagination";
+import { usePagination } from "@/hooks/usePagination";
 
 export default function DiscountsPage() {
+  const pagination = usePagination();
+
   const [createDiscount] = useCreateDiscountMutation();
   const [updateDiscount] = useUpdateDiscountMutation();
   const [deleteDiscount] = useDeleteDiscountMutation();
@@ -174,10 +179,14 @@ export default function DiscountsPage() {
     }
   };
 
+  //pagination
+  const total = response?.meta?.total || 0;
+  const totalPages = Math.ceil(total / pagination.limit);
+
   // 🧠 Memoize heavy DataTable
   const renderedTable = useMemo(() => {
     return (
-      <DiscountDataTables<ProductDiscount, unknown>
+      <DataTable<ProductDiscount, unknown>
         columns={columns({
           handleDelete,
           handleEdit,
@@ -362,6 +371,13 @@ export default function DiscountsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>{renderedTable}</CardContent>
+        <CardFooter className="flex items-center justify-center">
+          <Pagination
+            total={total}
+            pagination={pagination}
+            totalPages={totalPages}
+          />
+        </CardFooter>
       </Card>
     </div>
   );
