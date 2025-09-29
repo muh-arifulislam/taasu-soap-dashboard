@@ -40,7 +40,6 @@ import { AddDiscountDialog } from "./components";
 export default function DiscountsPage() {
   const pagination = usePagination();
 
-  const [createDiscount] = useCreateDiscountMutation();
   const [updateDiscount] = useUpdateDiscountMutation();
   const [deleteDiscount] = useDeleteDiscountMutation();
 
@@ -77,17 +76,6 @@ export default function DiscountsPage() {
     useState<ProductDiscount | null>(null);
 
   // Filter discounts based on search and filters
-
-  const handleEdit = (discount: ProductDiscount) => {
-    setEditingDiscount(discount);
-    setFormData({
-      name: discount.name,
-      description: discount.description || "",
-      discountPercent: discount.discountPercent,
-      isActive: discount.isActive,
-    });
-    setIsAddDialogOpen(true);
-  };
 
   const handleDelete = async (discountId: string) => {
     try {

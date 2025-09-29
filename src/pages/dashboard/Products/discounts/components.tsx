@@ -13,10 +13,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import type { ProductDiscount } from "@/types";
 import { Percent, Plus } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
-export const AddDiscountDialog = ({
+type PropsType = {
+  isDialogOpen: boolean;
+  setIsDialogOpen: (open: boolean) => void;
+  editingDiscount: ProductDiscount | null;
+  setEditingDiscount: (discount: ProductDiscount | null) => void;
+};
+
+export const AddDiscountDialog: React.FC<PropsType> = ({
   isDialogOpen,
   setIsDialogOpen,
   setEditingDiscount,
@@ -61,7 +70,7 @@ export const AddDiscountDialog = ({
         toast.success("The discount has been created successfully.");
       }
 
-      setIsAddDialogOpen(false);
+      setIsDialogOpen(false);
       resetForm();
     } catch (error) {
       console.error(error);
