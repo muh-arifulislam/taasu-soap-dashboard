@@ -8,21 +8,18 @@ import debounce from "lodash.debounce";
 
 import { useEffect } from "react";
 
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationPrevious,
-  PaginationNext,
-} from "@/components/ui/pagination";
-import { TableSkeleton } from "@/components/skeleton/TableSkeleton";
-import { PaginationSkeleton } from "@/components/skeleton/PaginationSkeleton";
-import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { useGetAdminUsersQuery } from "@/redux/features/users/userApi";
 import type { IUser } from "@/types";
+import { DataTable } from "@/components/table/DataTable";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { usePagination } from "@/hooks/usePagination";
+import { Pagination } from "@/components/pagination";
+import DataTablePageSkeleton from "@/components/DataTablePageSkeleton";
 
 const Users: React.FC = () => {
+  const pagination = usePagination();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
@@ -52,33 +49,7 @@ const Users: React.FC = () => {
     };
   }, [debouncedSetter]);
 
-  //   // Create a debounced function
-  //   const debouncedChangeHandler = useCallback(
-  //     debounce((value: string) => {
-  //       setDebouncedSearchTerm(value);
-  //     }, 500),
-  //     []
-  //   );
-
-  //   // Handle input changes
-  //   useEffect(() => {
-  //     if (searchTerm === "") {
-  //       // If input is cleared, cancel debounce and immediately update
-  //       debouncedChangeHandler.cancel();
-  //       setDebouncedSearchTerm("");
-  //     } else {
-  //       debouncedChangeHandler(searchTerm);
-  //     }
-
-  //     // Cleanup on unmount
-  //     return () => {
-  //       debouncedChangeHandler.cancel();
-  //     };
-  //   }, [searchTerm, debouncedChangeHandler]);
-
   const [sortValue, setSortValue] = useState("");
-  const [page, setPage] = useState(1);
-  const limit = 10;
 
   const [sortBy, sortOrder] = sortValue.split("-");
 
@@ -87,12 +58,12 @@ const Users: React.FC = () => {
     searchTerm: debouncedSearchTerm,
     sortBy,
     sortOrder: sortOrder as "asc" | "desc",
-    page,
-    limit,
+    page: pagination.page,
+    limit: pagination.limit,
   });
 
   const total = data?.meta.total || 0;
-  const totalPages = Math.ceil(total / limit);
+  const totalPages = Math.ceil(total / pagination.limit);
 
   // 🧠 Memoize heavy DataTable
   const renderedTable = useMemo(() => {
@@ -101,90 +72,49 @@ const Users: React.FC = () => {
     );
   }, [data?.data]);
 
+  if (isLoading) {
+    return <DataTablePageSkeleton />;
+  }
+
   return (
     <div>
-      <div className="w-full flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-        <div className="flex items-center gap-4">
-          <Input
-            value={searchTerm}
-            onChange={handleInputChange}
-            placeholder="Search with Email, Name"
-            className="max-w-sm"
+      <Card className="rounded-md shadow-none mb-2">
+        <CardContent>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Input
+                value={searchTerm}
+                onChange={handleInputChange}
+                placeholder="Search with Email, Name"
+                className="max-w-sm"
+              />
+
+              <SortDropdown value={sortValue} onValueChange={setSortValue} />
+            </div>
+            <div>
+              <Button
+                onClick={() => {
+                  refetch();
+                }}
+                size="sm"
+              >
+                Refetch
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-md shadow-none">
+        <CardContent>{renderedTable}</CardContent>
+        <CardFooter className="flex items-center justify-center">
+          <Pagination
+            total={total}
+            pagination={pagination}
+            totalPages={totalPages}
           />
-
-          <SortDropdown value={sortValue} onValueChange={setSortValue} />
-        </div>
-        <div>
-          <Button
-            onClick={() => {
-              refetch();
-            }}
-            size="sm"
-          >
-            Refetch
-          </Button>
-        </div>
-      </div>
-      <>
-        {isLoading || isFetching ? (
-          <TableSkeleton rows={8} columns={7} />
-        ) : (
-          renderedTable
-        )}
-      </>
-      <>
-        {isLoading || isFetching ? (
-          <PaginationSkeleton />
-        ) : (
-          <>
-            {totalPages > 1 && (
-              <Pagination className="mt-4">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                      className={
-                        page <= 1 ? "pointer-events-none opacity-50" : ""
-                      }
-                    />
-                  </PaginationItem>
-
-                  {Array.from({ length: totalPages }).map((_, idx) => {
-                    const pageNumber = idx + 1;
-                    return (
-                      <PaginationItem key={pageNumber}>
-                        <button
-                          onClick={() => setPage(pageNumber)}
-                          className={`px-3 py-1 rounded-md ${
-                            page === pageNumber
-                              ? "bg-primary text-white"
-                              : "text-muted-foreground"
-                          }`}
-                        >
-                          {pageNumber}
-                        </button>
-                      </PaginationItem>
-                    );
-                  })}
-
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() =>
-                        setPage((prev) => Math.min(totalPages, prev + 1))
-                      }
-                      className={
-                        page >= totalPages
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
-          </>
-        )}
-      </>
+        </CardFooter>
+      </Card>
     </div>
   );
 };

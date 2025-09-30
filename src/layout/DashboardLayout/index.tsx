@@ -46,7 +46,7 @@ export const DashboardLayout: React.FC = () => {
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col min-w-0">
             {/* Top Navbar - Fixed */}
-            <header className="flex items-center justify-between px-6 py-0 border-b border-border">
+            <header className="flex items-center justify-between px-6 py-0 border-b border-border bg-background dark:bg-primary-foreground">
               <div className="flex justify-between items-center w-full">
                 <div className="flex items-center gap-2 px-4">
                   <SidebarTrigger className="-ml-1" />
@@ -92,7 +92,7 @@ export const DashboardLayout: React.FC = () => {
             </header>
 
             {/* Main Content - Scrollable */}
-            <main className="flex-1 overflow-auto p-4 bg-accent">
+            <main className="flex-1 overflow-auto p-4 bg-secondary">
               <Outlet />
             </main>
 
