@@ -1,12 +1,8 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 
 import { Button } from "@/components/ui/button";
 import { SortDropdown } from "@/components/sort.dropdown";
-
-import debounce from "lodash.debounce";
-
-import { useEffect } from "react";
 
 import { columns } from "./columns";
 import { useGetAdminUsersQuery } from "@/redux/features/users/userApi";
@@ -16,46 +12,20 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { usePagination } from "@/hooks/usePagination";
 import { Pagination } from "@/components/pagination";
 import DataTablePageSkeleton from "@/components/DataTablePageSkeleton";
+import { useUserFilters } from "./hooks";
 
 const Users: React.FC = () => {
   const pagination = usePagination();
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-
-  // Create debounced setter for searchTerm
-  const debouncedSetter = useMemo(
-    () =>
-      debounce((value: string) => {
-        setDebouncedSearchTerm(value);
-      }, 500),
-    []
-  );
-
-  // Input change handler (only updates debouncedSearchTerm)
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setSearchTerm(value);
-      debouncedSetter(value);
-    },
-    [debouncedSetter]
-  );
-
-  // Cancel debounce on unmount
-  useEffect(() => {
-    return () => {
-      debouncedSetter.cancel();
-    };
-  }, [debouncedSetter]);
+  const filter = useUserFilters();
 
   const [sortValue, setSortValue] = useState("");
 
   const [sortBy, sortOrder] = sortValue.split("-");
 
   // Trigger fetch
-  const { data, isLoading, isFetching, refetch } = useGetAdminUsersQuery({
-    searchTerm: debouncedSearchTerm,
+  const { data, isLoading, refetch } = useGetAdminUsersQuery({
+    searchTerm: filter.debouncedSearchTerm,
     sortBy,
     sortOrder: sortOrder as "asc" | "desc",
     page: pagination.page,
@@ -83,8 +53,8 @@ const Users: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <Input
-                value={searchTerm}
-                onChange={handleInputChange}
+                value={filter.searchTerm}
+                onChange={filter.handleInputChange}
                 placeholder="Search with Email, Name"
                 className="max-w-sm"
               />
