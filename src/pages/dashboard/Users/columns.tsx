@@ -7,7 +7,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import dayjs from "dayjs";
 import { Badge } from "@/components/ui/badge";
 import { UserRole, type TUserRole } from "@/types/user";
-import { UserActionCell } from "./UserActionCell";
+import { UserActionCell } from "./action-cell";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.

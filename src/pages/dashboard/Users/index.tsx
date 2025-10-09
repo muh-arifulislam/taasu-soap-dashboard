@@ -16,7 +16,6 @@ import { useUserFilters } from "./hooks";
 
 const Users: React.FC = () => {
   const pagination = usePagination();
-
   const filter = useUserFilters();
 
   const [sortValue, setSortValue] = useState("");
