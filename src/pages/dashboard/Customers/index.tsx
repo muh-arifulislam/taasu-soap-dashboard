@@ -1,98 +1,30 @@
-import React, { useCallback, useMemo, useState } from "react";
-import { DataTable } from "./data-table";
+import React, { useMemo } from "react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { columns } from "./columns";
 import type { TOrder } from "@/types";
 import { Input } from "@/components/ui/input";
 
-import { Button } from "@/components/ui/button";
 import { SortDropdown } from "@/components/sort.dropdown";
 
-import debounce from "lodash.debounce";
-
-import { useEffect } from "react";
-
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationPrevious,
-  PaginationNext,
-} from "@/components/ui/pagination";
-import { TableSkeleton } from "@/components/skeleton/TableSkeleton";
-import { PaginationSkeleton } from "@/components/skeleton/PaginationSkeleton";
-import { useGetCustomersQuery } from "@/redux/features/customers/customerApi";
+import { DataTable } from "@/components/table/DataTable";
+import { Pagination } from "@/components/pagination";
+import { Separator } from "@/components/ui/separator";
+import { usePagination } from "@/hooks/usePagination";
+import { useCustomersFilters } from "./hooks/useCustomersFilters";
+import { useCustomersData } from "./hooks/useCustomersData";
+import RefreshButton from "@/components/button/RefreshButton";
+import DataTablePageSkeleton from "@/components/DataTablePageSkeleton";
 
 const Customers: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-
-  // Create debounced setter for searchTerm
-  const debouncedSetter = useMemo(
-    () =>
-      debounce((value: string) => {
-        setDebouncedSearchTerm(value);
-      }, 500),
-    []
-  );
-
-  // Input change handler (only updates debouncedSearchTerm)
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setSearchTerm(value);
-      debouncedSetter(value);
-    },
-    [debouncedSetter]
-  );
-
-  // Cancel debounce on unmount
-  useEffect(() => {
-    return () => {
-      debouncedSetter.cancel();
-    };
-  }, [debouncedSetter]);
-
-  //   // Create a debounced function
-  //   const debouncedChangeHandler = useCallback(
-  //     debounce((value: string) => {
-  //       setDebouncedSearchTerm(value);
-  //     }, 500),
-  //     []
-  //   );
-
-  //   // Handle input changes
-  //   useEffect(() => {
-  //     if (searchTerm === "") {
-  //       // If input is cleared, cancel debounce and immediately update
-  //       debouncedChangeHandler.cancel();
-  //       setDebouncedSearchTerm("");
-  //     } else {
-  //       debouncedChangeHandler(searchTerm);
-  //     }
-
-  //     // Cleanup on unmount
-  //     return () => {
-  //       debouncedChangeHandler.cancel();
-  //     };
-  //   }, [searchTerm, debouncedChangeHandler]);
-
-  const [sortValue, setSortValue] = useState("");
-  const [page, setPage] = useState(1);
-  const limit = 10;
-
-  const [sortBy, sortOrder] = sortValue.split("-");
-
-  // Trigger fetch
-  const { data, isLoading, isFetching, refetch } = useGetCustomersQuery({
-    searchTerm: debouncedSearchTerm,
-    sortBy,
-    sortOrder: sortOrder as "asc" | "desc",
-    page,
-    limit,
+  const filters = useCustomersFilters();
+  const pagination = usePagination();
+  const { data, refetch, isFetching, isLoading } = useCustomersData({
+    filters,
+    pagination,
   });
 
   const total = data?.meta.total || 0;
-  const totalPages = Math.ceil(total / limit);
+  const totalPages = Math.ceil(total / pagination.limit);
 
   // 🧠 Memoize heavy DataTable
   const renderedTable = useMemo(() => {
@@ -101,90 +33,48 @@ const Customers: React.FC = () => {
     );
   }, [data?.data]);
 
+  if (isLoading) {
+    return <DataTablePageSkeleton />;
+  }
   return (
     <div>
-      <div className="w-full flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-        <div className="flex items-center gap-4">
-          <Input
-            value={searchTerm}
-            onChange={handleInputChange}
-            placeholder="Search with Email, Name"
-            className="max-w-sm"
+      {/* Filters and Search */}
+      <Card className="rounded-md shadow-none mb-1">
+        <CardContent className="flex flex-col lg:flex-row gap-4 justify-between">
+          <div className="flex items-center gap-4">
+            <Input
+              value={filters.searchTerm}
+              onChange={filters.handleInputChange}
+              placeholder="Search with Email, Name"
+              className="max-w-sm"
+            />
+
+            <SortDropdown
+              value={filters.sortValue}
+              onValueChange={filters.setSortValue}
+            />
+          </div>
+          <div>
+            <RefreshButton refetch={refetch} isFetching={isFetching} />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Products Table */}
+      <Card className="rounded-md shadow-none">
+        <CardContent>{renderedTable}</CardContent>
+
+        <div className="px-8">
+          <Separator />
+        </div>
+        <CardFooter className="flex items-center justify-center">
+          <Pagination
+            total={total}
+            pagination={pagination}
+            totalPages={totalPages}
           />
-
-          <SortDropdown value={sortValue} onValueChange={setSortValue} />
-        </div>
-        <div>
-          <Button
-            onClick={() => {
-              refetch();
-            }}
-            size="sm"
-          >
-            Refetch
-          </Button>
-        </div>
-      </div>
-      <>
-        {isLoading || isFetching ? (
-          <TableSkeleton rows={8} columns={7} />
-        ) : (
-          renderedTable
-        )}
-      </>
-      <>
-        {isLoading || isFetching ? (
-          <PaginationSkeleton />
-        ) : (
-          <>
-            {totalPages > 1 && (
-              <Pagination className="mt-4">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                      className={
-                        page <= 1 ? "pointer-events-none opacity-50" : ""
-                      }
-                    />
-                  </PaginationItem>
-
-                  {Array.from({ length: totalPages }).map((_, idx) => {
-                    const pageNumber = idx + 1;
-                    return (
-                      <PaginationItem key={pageNumber}>
-                        <button
-                          onClick={() => setPage(pageNumber)}
-                          className={`px-3 py-1 rounded-md ${
-                            page === pageNumber
-                              ? "bg-primary text-white"
-                              : "text-muted-foreground"
-                          }`}
-                        >
-                          {pageNumber}
-                        </button>
-                      </PaginationItem>
-                    );
-                  })}
-
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() =>
-                        setPage((prev) => Math.min(totalPages, prev + 1))
-                      }
-                      className={
-                        page >= totalPages
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
-          </>
-        )}
-      </>
+        </CardFooter>
+      </Card>
     </div>
   );
 };

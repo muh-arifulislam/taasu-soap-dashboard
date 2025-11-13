@@ -1,8 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { DataTable } from "./data-table";
+import React, { useMemo } from "react";
 import { columns } from "./columns";
-import { useGetOrdersQuery } from "@/redux/features/orders/orderApi";
-import type { TOrder } from "@/types";
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
@@ -14,184 +11,117 @@ import {
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SortDropdown } from "@/components/sort.dropdown";
-
-import { useEffect } from "react";
-
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationPrevious,
-  PaginationNext,
-} from "@/components/ui/pagination";
-import { TableSkeleton } from "@/components/skeleton/TableSkeleton";
-import { PaginationSkeleton } from "@/components/skeleton/PaginationSkeleton";
-import { useDebouncedInput } from "@/hooks/useDebouncedInput";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { DataTable } from "@/components/table/DataTable";
+import { Pagination } from "@/components/pagination";
+import { usePagination } from "@/hooks/usePagination";
+import { useOrderFilters } from "./hooks/useOrderFilters";
+import { useOrdersData } from "./hooks/userOrdersData";
+import DataTablePageSkeleton from "@/components/DataTablePageSkeleton";
+import RefreshButton from "@/components/button/RefreshButton";
 
 const Orders: React.FC = () => {
-  const {
-    searchTerm,
-    debouncedSearchTerm,
-    handleInputChange,
-    debouncedSetter,
-  } = useDebouncedInput();
-
-  // Cancel debounce on unmount
-  useEffect(() => {
-    return () => {
-      debouncedSetter.cancel();
-    };
-  }, [debouncedSetter]);
-
-  const [statusFilter, setStatusFilter] = useState("");
-  const [sortValue, setSortValue] = useState("");
-  const [page, setPage] = useState(1);
-  const limit = 10;
-
-  const [sortBy, sortOrder] = sortValue.split("-");
-
-  // Trigger fetch
-  const { data, isLoading, isFetching, refetch } = useGetOrdersQuery({
-    searchTerm: debouncedSearchTerm,
-    orderStatus: statusFilter,
-    sortBy,
-    sortOrder: sortOrder as "asc" | "desc",
-    page,
-    limit,
+  //feature hooks
+  const filters = useOrderFilters();
+  const pagination = usePagination();
+  const { data, refetch, isLoading, isFetching } = useOrdersData({
+    filters,
+    pagination,
   });
 
-  const total = data?.meta.total || 0;
-  const totalPages = Math.ceil(total / limit);
+  //pagination
+  const total = data?.meta?.total || 0;
+  const totalPages = Math.ceil(total / pagination.limit);
 
   // 🧠 Memoize heavy DataTable
   const renderedTable = useMemo(() => {
-    return (
-      <DataTable<TOrder, unknown> columns={columns} data={data?.data || []} />
-    );
+    return <DataTable columns={columns} data={data?.data || []} />;
   }, [data?.data]);
 
+  if (isLoading) {
+    return <DataTablePageSkeleton />;
+  }
+
   return (
-    <div>
-      <div className="w-full flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-        <div className="flex items-center gap-4">
-          <Input
-            value={searchTerm}
-            onChange={handleInputChange}
-            placeholder="Search with Email, Name"
-            className="max-w-sm"
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Filter by Status <ChevronDown />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuRadioGroup
-                value={statusFilter}
-                onValueChange={setStatusFilter}
-              >
-                <DropdownMenuRadioItem value="" defaultChecked>
-                  All
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="Pending">
-                  Pending
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="Processing">
-                  Processing
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="Shipped">
-                  Shipped
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="Delivered">
-                  Delivered
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="Completed">
-                  Completed
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="Canceled">
-                  Canceled
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="Halted">
-                  Halted
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <SortDropdown value={sortValue} onValueChange={setSortValue} />
-        </div>
-        <div>
-          <Button
-            onClick={() => {
-              refetch();
-            }}
-            size="sm"
-          >
-            Refetch
-          </Button>
-        </div>
+    <>
+      <div className="space-y-6">
+        {/* Filters and Search */}
+        <Card className="rounded-md shadow-none mb-1">
+          <CardContent className="flex flex-col lg:flex-row gap-4 justify-between">
+            <div className="flex items-center gap-4">
+              <Input
+                value={filters.searchTerm}
+                onChange={filters.handleInputChange}
+                placeholder="Search with Email, Name"
+                className="max-w-sm"
+              />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="ml-auto">
+                    Filter by Status <ChevronDown />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuRadioGroup
+                    value={filters.statusFilter}
+                    onValueChange={filters.setStatusFilter}
+                  >
+                    <DropdownMenuRadioItem value="" defaultChecked>
+                      All
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Pending">
+                      Pending
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Processing">
+                      Processing
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Shipped">
+                      Shipped
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Delivered">
+                      Delivered
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Completed">
+                      Completed
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Canceled">
+                      Canceled
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Halted">
+                      Halted
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <SortDropdown
+                value={filters.sortValue}
+                onValueChange={filters.setSortValue}
+              />
+            </div>
+            <div>
+              <RefreshButton refetch={refetch} isFetching={isFetching} />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Products Table */}
+        <Card className="rounded-md shadow-none">
+          <CardContent>{renderedTable}</CardContent>
+
+          <div className="px-8">
+            <Separator />
+          </div>
+          <CardFooter className="flex items-center justify-center">
+            <Pagination
+              total={total}
+              pagination={pagination}
+              totalPages={totalPages}
+            />
+          </CardFooter>
+        </Card>
       </div>
-      <>
-        {isLoading || isFetching ? (
-          <TableSkeleton rows={8} columns={7} />
-        ) : (
-          renderedTable
-        )}
-      </>
-      <>
-        {isLoading || isFetching ? (
-          <PaginationSkeleton />
-        ) : (
-          <>
-            {totalPages > 1 && (
-              <Pagination className="mt-4">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                      className={
-                        page <= 1 ? "pointer-events-none opacity-50" : ""
-                      }
-                    />
-                  </PaginationItem>
-
-                  {Array.from({ length: totalPages }).map((_, idx) => {
-                    const pageNumber = idx + 1;
-                    return (
-                      <PaginationItem key={pageNumber}>
-                        <button
-                          onClick={() => setPage(pageNumber)}
-                          className={`px-3 py-1 rounded-md ${
-                            page === pageNumber
-                              ? "bg-primary text-white"
-                              : "text-muted-foreground"
-                          }`}
-                        >
-                          {pageNumber}
-                        </button>
-                      </PaginationItem>
-                    );
-                  })}
-
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() =>
-                        setPage((prev) => Math.min(totalPages, prev + 1))
-                      }
-                      className={
-                        page >= totalPages
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
-          </>
-        )}
-      </>
-    </div>
+    </>
   );
 };
 

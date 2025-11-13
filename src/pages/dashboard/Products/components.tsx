@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input";
 import {
   Plus,
   Search,
-  RefreshCw,
   XCircle,
   AlertTriangle,
   CheckCircle,
@@ -29,6 +28,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { Product } from "@/types";
+import RefreshButton from "@/components/button/RefreshButton";
 
 export const ProductFilters: React.FC<{
   filters: ReturnType<typeof useProductFilters>;
@@ -102,14 +102,7 @@ export const ProductFilters: React.FC<{
             </Select>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              onClick={() => refetch()}
-              variant="outline"
-              disabled={isFetching}
-            >
-              <RefreshCw className={`${isFetching ? "animate-spin" : ""}`} />
-              Refetch
-            </Button>
+            <RefreshButton refetch={refetch} isFetching={isFetching} />
             <Button onClick={() => navigate("/dashboard/products/create")}>
               <Plus className="h-4 w-4 mr-2" />
               Add Product
