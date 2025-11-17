@@ -149,7 +149,6 @@ export const CategoryFormDialog: React.FC<{
               : "Create a new product category."}
           </DialogDescription>
         </DialogHeader>
-
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">

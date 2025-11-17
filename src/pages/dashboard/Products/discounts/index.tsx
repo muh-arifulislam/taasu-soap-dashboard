@@ -1,9 +1,6 @@
-import type React from "react";
-
-import { useState, useEffect, useMemo } from "react";
-import { Plus, Search, Percent, RefreshCw } from "lucide-react";
+import { useState, useCallback, useMemo } from "react";
+import { Plus, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -13,45 +10,25 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
 import { toast } from "sonner";
-import {
-  useDeleteDiscountMutation,
-  useCreateDiscountMutation,
-  useGetAllDiscountsQuery,
-  useUpdateDiscountMutation,
-} from "@/redux/features/products/productDiscountApi";
+import { useGetAllDiscountsQuery } from "@/redux/features/products/productDiscountApi";
 import type { ProductDiscount } from "@/types";
 import { columns } from "./columns";
-import { useDebouncedInput } from "@/hooks/useDebouncedInput";
 import DataTablePageSkeleton from "@/components/DataTablePageSkeleton";
 import { DataTable } from "@/components/table/DataTable";
 import { Pagination } from "@/components/pagination";
 import { usePagination } from "@/hooks/usePagination";
-import { AddDiscountDialog } from "./components";
+import { DiscountFilters, DiscountFormDialog } from "./components";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { useDiscountForm } from "./hooks/useDiscountForm";
+import type { DiscountFormData } from "./validation";
+import { useDiscountOperations } from "./hooks/useDiscountOperations";
+import { useDiscountFilters } from "./hooks/useDiscountFilters";
 
 export default function DiscountsPage() {
   const pagination = usePagination();
-
-  const [updateDiscount] = useUpdateDiscountMutation();
-  const [deleteDiscount] = useDeleteDiscountMutation();
-
-  const {
-    searchTerm,
-    debouncedSearchTerm,
-    handleInputChange,
-    debouncedSetter,
-  } = useDebouncedInput();
-
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [discountRangeFilter, setDiscountRangeFilter] = useState<string>("all");
+  const operations = useDiscountOperations();
+  const filters = useDiscountFilters();
 
   const {
     data: response,
@@ -59,57 +36,87 @@ export default function DiscountsPage() {
     isFetching,
     refetch,
   } = useGetAllDiscountsQuery({
-    searchTerm: debouncedSearchTerm,
-    statusFilter,
-    discountRangeFilter,
+    searchTerm: filters.debouncedSearchTerm,
+    activeStatus: filters.statusFilter,
+    discountRangeFilter: filters.discountRangeFilter,
+    sortBy: filters.sorting,
   });
 
-  // Cancel debounce on unmount
-  useEffect(() => {
-    return () => {
-      debouncedSetter.cancel();
-    };
-  }, [debouncedSetter]);
-
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [editingDiscount, setEditingDiscount] =
     useState<ProductDiscount | null>(null);
 
-  // Filter discounts based on search and filters
-
-  const handleDelete = async (discountId: string) => {
-    try {
-      await deleteDiscount(discountId).unwrap();
-      toast.success("The discount has been deleted successfully.");
-    } catch (error) {
-      console.error(error);
-      toast.error("There was an error deleting the discount.");
-    }
-  };
-
-  const toggleStatus = async (discountId: string) => {
-    try {
-      const discount = response?.data.find((d) => d._id === discountId);
-      if (!discount) return;
-
-      await updateDiscount({
-        id: discountId,
-        data: {
-          ...discount,
-          isActive: !discount.isActive,
-        },
-      }).unwrap();
-
-      toast.success("The discount status has been updated.");
-    } catch (error) {
-      console.error(error);
-      toast.error("There was an error updating the status.");
-    }
-  };
+  const form = useDiscountForm(editingDiscount);
 
   //pagination
   const total = response?.meta?.total || 0;
   const totalPages = Math.ceil(total / pagination.limit);
+
+  // Event handlers
+  const handleFormSubmit = useCallback(
+    async (data: DiscountFormData) => {
+      setIsLoading(true);
+      try {
+        if (editingDiscount) {
+          await operations.handleUpdate(editingDiscount._id, data);
+        } else {
+          await operations.handleCreate(data);
+        }
+        setIsAddDialogOpen(false);
+        form.resetForm();
+        setEditingDiscount(null);
+      } catch (error) {
+        console.error(error);
+        toast.error("There was an error saving the category.");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [editingDiscount, operations, form]
+  );
+
+  const handleDelete = useCallback(
+    async (categoryId: string) => {
+      try {
+        await operations.handleDelete(categoryId);
+      } catch (error) {
+        console.error(error);
+        toast.error("There was an error deleting the category.");
+      }
+    },
+    [operations]
+  );
+
+  const handleEdit = useCallback(
+    (discount: ProductDiscount) => {
+      setEditingDiscount(discount);
+      form.populateForm(discount);
+      setIsAddDialogOpen(true);
+    },
+    [form]
+  );
+
+  const handleToggleStatus = useCallback(
+    async (discountId: string) => {
+      const discount = response?.data.find((d) => d._id === discountId);
+      if (!discount) return;
+
+      try {
+        await operations.handleToggleStatus(discount);
+      } catch (error) {
+        console.error(error);
+        toast.error("There was an error updating the status.");
+      }
+    },
+    [response?.data, operations]
+  );
+
+  const handleAddNew = useCallback(() => {
+    form.resetForm();
+    setEditingDiscount(null);
+    setIsAddDialogOpen(true);
+  }, [form]);
 
   // 🧠 Memoize heavy DataTable
   const renderedTable = useMemo(() => {
@@ -118,7 +125,7 @@ export default function DiscountsPage() {
         columns={columns({
           handleDelete,
           handleEdit,
-          toggleStatus,
+          toggleStatus: handleToggleStatus,
         })}
         data={response?.data || []}
       />
@@ -133,41 +140,7 @@ export default function DiscountsPage() {
     <div className="space-y-6">
       <Card className="rounded-md shadow-none mb-1">
         <CardContent className="flex flex-col lg:flex-row gap-4 justify-between">
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search products..."
-                value={searchTerm}
-                onChange={handleInputChange}
-                className="pl-8 bg-accent"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select
-              value={discountRangeFilter}
-              onValueChange={setDiscountRangeFilter}
-            >
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Ranges</SelectItem>
-                <SelectItem value="low">Low (&lt;=10%)</SelectItem>
-                <SelectItem value="medium">Medium (11-30%)</SelectItem>
-                <SelectItem value="high">High (&gt;30%)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <DiscountFilters filters={filters} />
           <div className="flex items-center gap-2">
             <Button
               onClick={() => refetch()}
@@ -177,12 +150,22 @@ export default function DiscountsPage() {
               <RefreshCw className={`${isFetching ? "animate-spin" : ""}`} />
               Refetch
             </Button>
-            <AddDiscountDialog
-              isDialogOpen={isAddDialogOpen}
-              setIsDialogOpen={setIsAddDialogOpen}
-              editingDiscount={editingDiscount}
-              setEditingDiscount={setEditingDiscount}
-            />
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={handleAddNew}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Category
+                </Button>
+              </DialogTrigger>
+              <DiscountFormDialog
+                open={isAddDialogOpen}
+                onOpenChange={setIsAddDialogOpen}
+                form={form}
+                editingDiscount={editingDiscount}
+                onSubmit={handleFormSubmit}
+                isLoading={isLoading}
+              />
+            </Dialog>
           </div>
         </CardContent>
       </Card>

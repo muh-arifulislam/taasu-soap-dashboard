@@ -16,12 +16,43 @@ export const productDiscountApi = baseApi.injectEndpoints({
     // Read All
     getAllDiscounts: builder.query<
       ApiResponse<ProductDiscount[]>,
-      { searchTerm: string; discountRangeFilter: string; statusFilter: string }
+      {
+        searchTerm?: string;
+        activeStatus?: string;
+        page?: number;
+        limit?: number;
+        sortBy?: string;
+        discountRangeFilter?: string;
+      }
     >({
-      query: ({ searchTerm, statusFilter, discountRangeFilter }) => ({
-        method: "GET",
-        url: `product-discounts?search=${searchTerm}&isActive=${statusFilter}&discountRange=${discountRangeFilter}`,
-      }),
+      query: ({
+        searchTerm,
+        activeStatus,
+        page,
+        limit,
+        sortBy,
+        discountRangeFilter,
+      }) => {
+        const params = new URLSearchParams();
+
+        if (searchTerm) params.append("search", searchTerm);
+        if (page) params.append("page", page.toString());
+        if (limit) params.append("limit", limit.toString());
+        if (sortBy) params.append("sort", sortBy);
+        if (discountRangeFilter) {
+          params.append("discountRange", discountRangeFilter);
+        }
+        if (activeStatus === "active") {
+          params.append("isActive", "true");
+        } else if (activeStatus === "inactive") {
+          params.append("isActive", "false");
+        }
+
+        return {
+          method: "GET",
+          url: `product-discounts?${params.toString()}`,
+        };
+      },
       providesTags: ["productDiscounts"],
     }),
 
