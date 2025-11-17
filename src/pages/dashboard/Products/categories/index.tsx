@@ -23,17 +23,15 @@ import DataTablePageSkeleton from "@/components/DataTablePageSkeleton";
 
 import { usePagination } from "@/hooks/usePagination";
 import { Pagination } from "@/components/pagination";
-import {
-  useCategoryFilters,
-  useCategoryForm,
-  useCategoryOperations,
-} from "./hooks";
 
 import DataTableSkeleton from "@/components/data-table-skeleton";
 import type { CategoryFormData } from "./validation";
 import { DataTable } from "@/components/table/DataTable";
 import { columns } from "./columns";
 import { CategoryFilters, CategoryFormDialog } from "./components";
+import { useCategoryFilters } from "./hooks/useCategoryFilters";
+import { useCategoryOperations } from "./hooks/useCategoryOperations";
+import { useCategoryForm } from "./hooks/useCategoryForm";
 
 export default function CategoriesPage() {
   const pagination = usePagination();

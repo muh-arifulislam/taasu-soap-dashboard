@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import type { useCategoryFilters } from "./hooks";
+import type { useCategoryFilters } from "./hooks/useCategoryFilters";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -40,7 +40,7 @@ import {
 
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import type { useCategoryForm } from "./hooks";
+import type { useCategoryForm } from "./hooks/useCategoryForm";
 import type { CategoryFormData } from "./validation";
 
 export const CategoryFilters: React.FC<{
@@ -70,7 +70,7 @@ export const CategoryFilters: React.FC<{
         </div>
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px] bg-accent">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
@@ -88,7 +88,7 @@ export const CategoryFilters: React.FC<{
             setCategoryType(value as ProductCategoryType | "all")
           }
         >
-          <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px] bg-accent">
             <SelectValue placeholder="Filter by type" />
           </SelectTrigger>
           <SelectContent>
@@ -102,7 +102,7 @@ export const CategoryFilters: React.FC<{
         </Select>
 
         <Select value={sorting} onValueChange={setSorting}>
-          <SelectTrigger className="relative w-[165px] bg-accent pl-15 font-semibold">
+          <SelectTrigger className="relative w-[165px] bg-accent pl-15 ">
             <SelectValue />
             <span className="absolute left-2 text-muted-foreground font-normal">
               Sort by:
@@ -158,6 +158,7 @@ export const CategoryFormDialog: React.FC<{
                 id="name"
                 {...register("name")}
                 placeholder="Enter category name"
+                className="bg-accent"
               />
               {errors.name && (
                 <p className="text-sm text-red-500">{errors.name.message}</p>
@@ -170,6 +171,7 @@ export const CategoryFormDialog: React.FC<{
                 id="slug"
                 {...register("slug")}
                 placeholder="Enter category slug"
+                className="bg-accent"
               />
               {errors.slug && (
                 <p className="text-sm text-red-500">{errors.slug.message}</p>
@@ -184,7 +186,7 @@ export const CategoryFormDialog: React.FC<{
                   setValue("type", value as ProductCategoryType)
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-accent w-full">
                   <SelectValue placeholder="Select a type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -260,7 +262,12 @@ export const CategoryActionCell: React.FC<CategoryActionCellProps> = ({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-400"
+            >
+              Delete
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
