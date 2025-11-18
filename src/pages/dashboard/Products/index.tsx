@@ -9,12 +9,15 @@ import DataTablePageSkeleton from "@/components/DataTablePageSkeleton";
 import { usePagination } from "@/hooks/usePagination";
 import { Pagination } from "@/components/pagination";
 import { DataTable } from "@/components/table/DataTable";
-import { useProductFilters } from "./hooks";
+import { useProductFilters } from "./hooks/useProductFilters";
 import { ProductDialog, ProductFilters } from "./components";
+import { useProductOperations } from "./hooks/useProductOperations";
+import { toast } from "sonner";
 
 export default function ProductsPage() {
   const pagination = usePagination();
   const filters = useProductFilters();
+  const operations = useProductOperations();
 
   const {
     data: response,
@@ -37,12 +40,21 @@ export default function ProductsPage() {
 
   const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
 
+  const handleDelete = async (productId: string) => {
+    try {
+      await operations.handleDelete(productId);
+    } catch (error) {
+      console.error(error);
+      toast.error("There was an error deleting the Product.");
+    }
+  };
+
   // 🧠 Memoize heavy DataTable
   const renderedTable = useMemo(() => {
     return (
       <DataTable<Product, unknown>
         columns={columns({
-          handleDelete: () => {},
+          handleDelete,
           handleEdit: () => {},
           handleViewProduct: setViewingProduct,
         })}

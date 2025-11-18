@@ -1,14 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { Edit, Eye, MoreHorizontal, Trash2 } from "lucide-react";
-
+import { Edit, FileSearch, Trash2 } from "lucide-react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ProductActionCellProps {
   handleEdit: () => void;
@@ -18,37 +20,42 @@ interface ProductActionCellProps {
 
 export const ProductActionCell: React.FC<ProductActionCellProps> = ({
   handleViewProduct,
+  handleEdit,
+  handleDelete,
 }) => {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-        <DropdownMenuItem onClick={handleViewProduct}>
-          <Eye className="h-4 w-4 mr-2" />
-          View Details
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Edit className="h-4 w-4 mr-2" />
-          Edit
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => {
-            // setProductToDelete(product._id);
-            // setIsDeleteDialogOpen(true);
-          }}
-          className="text-red-600"
-        >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Delete
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center justify-end gap-1">
+      <Button variant="ghost" size="sm" onClick={handleViewProduct}>
+        <FileSearch className="h-4 w-4" />
+      </Button>
+      <Button variant="ghost" size="sm" onClick={handleEdit}>
+        <Edit className="h-4 w-4" />
+      </Button>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="ghost" size="sm">
+            <Trash2 className="h-4 w-4 text-red-500" />
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              discount
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-500 hover:bg-red-400"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 };

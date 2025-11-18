@@ -16,7 +16,6 @@ const RefreshButton = ({
         <RefreshCw className={`${isFetching ? "animate-spin" : ""}`} />
         Refetch
       </Button>
-      ;
     </>
   );
 };

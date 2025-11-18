@@ -13,6 +13,14 @@ export const productApi = baseApi.injectEndpoints({
       invalidatesTags: ["products"],
     }),
 
+    deleteProduct: builder.mutation({
+      query: (id) => ({
+        url: `/products/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["products"],
+    }),
+
     // Read All with query filters
     getAllProducts: builder.query<ApiResponse<Product[]>, unknown>({
       query: ({
@@ -24,7 +32,7 @@ export const productApi = baseApi.injectEndpoints({
         priceRange = "",
         searchTerm = "",
       }: ProductFilterState) => ({
-        url: `product?page=${page}&limit=${limit}&categories=${
+        url: `products?page=${page}&limit=${limit}&categories=${
           category === "all" ? "" : category
         }&search=${searchTerm}&stock=${stock}&sortBy=${sortBy}&priceRange=${priceRange}`,
         method: "GET",
@@ -46,4 +54,5 @@ export const {
   useCreateProductMutation,
   useGetAllProductsQuery,
   useGetProductByIdQuery,
+  useDeleteProductMutation,
 } = productApi;

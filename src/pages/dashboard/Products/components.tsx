@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import type { useProductFilters } from "./hooks";
+import type { useProductFilters } from "./hooks/useProductFilters";
 import { useGetAllCategoriesQuery } from "@/redux/features/products/productCategoryApi";
 
 import {
@@ -22,8 +22,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -191,13 +193,14 @@ export const ProductDialog: React.FC<{
         open={!!viewingProduct}
         onOpenChange={() => setViewingProduct(null)}
       >
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-fit lg:max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{viewingProduct?.name}</DialogTitle>
             <DialogDescription>
               Product details and information
             </DialogDescription>
           </DialogHeader>
+
           {viewingProduct && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -273,7 +276,11 @@ export const ProductDialog: React.FC<{
                 <h4 className="font-semibold mb-2">Ingredients</h4>
                 <div className="flex flex-wrap gap-2">
                   {viewingProduct.ingredients.map((ingredient, index) => (
-                    <Badge key={index} variant="secondary">
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="whitespace-normal break-words max-w-full"
+                    >
                       {ingredient}
                     </Badge>
                   ))}
@@ -305,7 +312,7 @@ export const ProductDialog: React.FC<{
               {viewingProduct.images.length > 0 && (
                 <div>
                   <h4 className="font-semibold mb-2">Images</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
                     {viewingProduct.images.map((image, index) => (
                       <img
                         key={index}
@@ -319,6 +326,14 @@ export const ProductDialog: React.FC<{
               )}
             </div>
           )}
+
+          <DialogFooter className="sm:justify-end">
+            <DialogClose asChild>
+              <Button type="button" variant="destructive" className="px-12">
+                Close
+              </Button>
+            </DialogClose>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

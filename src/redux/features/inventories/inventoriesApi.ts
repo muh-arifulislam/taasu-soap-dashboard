@@ -8,7 +8,7 @@ const inventoriesApi = baseApi.injectEndpoints({
           params as Record<string, string>
         ).toString();
         return {
-          url: `/inventory?${queryString}`,
+          url: `/inventories?${queryString}`,
           method: "GET",
         };
       },

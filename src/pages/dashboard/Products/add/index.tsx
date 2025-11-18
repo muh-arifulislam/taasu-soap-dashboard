@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,92 +30,17 @@ import {
 import { useGetAllCategoriesQuery } from "@/redux/features/products/productCategoryApi";
 import { useGetAllDiscountsQuery } from "@/redux/features/products/productDiscountApi";
 import { Plus, Save, Upload, X } from "lucide-react";
-import { useForm, useFieldArray } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "sonner";
-
-// Zod schema for form validation
-const productFormSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Product name is required")
-    .min(2, "Product name must be at least 2 characters"),
-  sku: z
-    .string()
-    .min(1, "SKU is required")
-    .min(3, "SKU must be at least 3 characters"),
-  price: z.number().min(0, "Price must be greater than 0"),
-  descriptions: z
-    .array(z.string().min(1, "Description cannot be empty"))
-    .min(1, "At least one description is required"),
-  advantages: z
-    .array(z.string().min(1, "Advantage cannot be empty"))
-    .min(1, "At least one advantage is required"),
-  ingredients: z
-    .array(z.string().min(1, "Ingredient cannot be empty"))
-    .min(1, "At least one ingredient is required"),
-  addInformation: z.object({
-    weight: z.string().min(1, "Weight is required"),
-    dimension: z.string().optional(),
-    direction: z.string().optional(),
-    warnings: z.string().optional(),
-  }),
-  images: z
-    .array(z.string().url("Invalid URL format"))
-    .min(1, "At least one image is required"),
-  categoryId: z.string().min(1, "Category is required"),
-  inventoryQuantity: z.number().min(0, "Quantity cannot be negative"),
-  inventorySold: z.number().min(0, "Sold quantity cannot be negative"),
-  discountId: z.string().nullable().optional(),
-});
-
-type ProductFormData = z.infer<typeof productFormSchema>;
-
-// const DEFAULT_VALUES = {
-//   name: "Organic Lavender & Citrus Soap Bar 110g",
-//   sku: "lsc 1105",
-//   price: 3.99,
-//   descriptions: [
-//     "Combining revitalising Lavender with zingy Citrus, this little ray of sublime soapy sunshine will refresh, tone, cleanse and purify your skin, and add a spring to your step!",
-//     "Pure Organic bar soap made with the finest natural ingredients and pure Lavender & Orange essential oils. Perfect for bath, shower & sink.",
-//   ],
-//   advantages: [
-//     "Totally free from detergents, SLS, sulphates, alcohol, parabens, sorbates, silicones & synthetic preservatives",
-//     "Made from Natural Ingredients",
-//     "Plant based and 100% Vegan",
-//     "Leaping Bunny Cruelty Free",
-//     "Plastic Free, Eco Friendly and Biodegradable (soap and packaging)",
-//     "RSPO Certified Sustainable Palm Oil",
-//   ],
-//   ingredients: [
-//     "Sodium Palmate* (derived from sustainable Palm Oil), Sodium Cocoate (derived from Coconut Oil), Aqua (Water), Naturally Occurring Glycerin (Glycerine), Rose Geranium Essential Oil (Pelargonium Graveolens), Sodium Chloride (Salt), Sodium Citrate (sodium salt derived from citric acid), Limonene**, Linalool**",
-//     "*made from 100% RSPO certified sustainable Palm Oil and Palm Kernel Oil",
-//     "**allergen – naturally occurring within the essential oils",
-//     "Made with 85.8% certified Organic Oils.",
-//   ],
-//   addInformation: {
-//     weight: "0.125 kg",
-//     dimension: "8.8 × 5.9 × 3.7 cm",
-//     direction:
-//       "Use with warm water to create a luxurious, silky lather. Wash off. Suitable for face and body.",
-//     warnings:
-//       "Avoid contact with the eyes. If product enters the eyes rinse well with warm water.",
-//   },
-//   images: ["https://dev-arifulislam.netlify.app/"],
-//   categoryId: "",
-//   inventoryQuantity: 50,
-//   inventorySold: 0,
-//   discountId: null,
-// };
+import { useProductForm } from "./hooks/useProductForm";
+import type { ProductFormData } from "./validation";
+import { useProductOperations } from "../hooks/useProductOperations";
 
 export default function AddProductPage() {
   const { data: discounts } = useGetAllDiscountsQuery({
     searchTerm: "",
     discountRangeFilter: "all",
-    statusFilter: "active",
+    activeStatus: "active",
   });
-
   const { data: categories } = useGetAllCategoriesQuery({
     searchTerm: "",
     activeStatus: "active",
@@ -122,64 +48,9 @@ export default function AddProductPage() {
     limit: 100,
   });
 
-  const form = useForm<ProductFormData>({
-    resolver: zodResolver(productFormSchema),
-    defaultValues: {
-      name: "",
-      sku: "",
-      price: 0,
-      descriptions: [""],
-      advantages: [""],
-      ingredients: [""],
-      images: [""],
-      categoryId: "",
-      inventoryQuantity: 0,
-      inventorySold: 0,
-      discountId: null,
-      addInformation: {
-        weight: "",
-        dimension: "",
-        direction: "",
-        warnings: "",
-      },
-    },
-  });
+  const operations = useProductOperations();
 
-  const {
-    fields: descriptionFields,
-    append: appendDescription,
-    remove: removeDescription,
-  } = useFieldArray({
-    control: form.control as any,
-    name: "descriptions",
-  });
-
-  const {
-    fields: advantageFields,
-    append: appendAdvantage,
-    remove: removeAdvantage,
-  } = useFieldArray({
-    control: form.control as any,
-    name: "advantages",
-  });
-
-  const {
-    fields: ingredientFields,
-    append: appendIngredient,
-    remove: removeIngredient,
-  } = useFieldArray({
-    control: form.control as any,
-    name: "ingredients",
-  });
-
-  const {
-    fields: imageFields,
-    append: appendImage,
-    remove: removeImage,
-  } = useFieldArray({
-    control: form.control as any,
-    name: "images",
-  });
+  const form = useProductForm();
 
   const onSubmit = async (data: ProductFormData) => {
     try {
@@ -192,13 +63,9 @@ export default function AddProductPage() {
         images: data.images.filter((img) => img.trim() !== ""),
       };
 
-      console.log("Product data to submit:", cleanedData);
+      await operations.handleCreate(cleanedData);
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      toast.success("Product created successfully");
-      form.reset();
+      form.handleResetForm();
     } catch (error) {
       console.error("Error creating product:", error);
       toast.error("Failed to create product");
@@ -215,7 +82,10 @@ export default function AddProductPage() {
           </p>
         </div>
         <div className="space-x-2">
-          <Button variant="outline" onClick={() => form.reset()}>
+          <Button variant="outline" onClick={form.handleDefault}>
+            Default
+          </Button>
+          <Button variant="outline" onClick={form.handleResetForm}>
             Reset
           </Button>
         </div>
@@ -224,7 +94,7 @@ export default function AddProductPage() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information */}
-          <Card>
+          <Card className="shadow-none">
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
               <CardDescription>
@@ -240,7 +110,11 @@ export default function AddProductPage() {
                     <FormItem>
                       <FormLabel>Product Name *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter product name" {...field} />
+                        <Input
+                          placeholder="Enter product name"
+                          {...field}
+                          className="bg-accent"
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -252,7 +126,11 @@ export default function AddProductPage() {
                     <FormItem>
                       <FormLabel>SKU *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter SKU" {...field} />
+                        <Input
+                          placeholder="Enter SKU"
+                          {...field}
+                          className="bg-accent"
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -272,6 +150,7 @@ export default function AddProductPage() {
                         onChange={(e) =>
                           field.onChange(parseFloat(e.target.value))
                         }
+                        className="bg-accent"
                       />
                     </FormControl>
                   </FormItem>
@@ -281,7 +160,7 @@ export default function AddProductPage() {
           </Card>
 
           {/* Category and Discount */}
-          <Card>
+          <Card className="shadow-none">
             <CardHeader>
               <CardTitle>Category & Discount</CardTitle>
               <CardDescription>
@@ -301,7 +180,7 @@ export default function AddProductPage() {
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full bg-accent">
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
                         </FormControl>
@@ -334,7 +213,7 @@ export default function AddProductPage() {
                         value={field.value ?? "none"}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full bg-accent">
                             <SelectValue placeholder="Select a discount" />
                           </SelectTrigger>
                         </FormControl>
@@ -364,13 +243,13 @@ export default function AddProductPage() {
           </Card>
 
           {/* Descriptions */}
-          <Card>
+          <Card className="shadow-none">
             <CardHeader>
               <CardTitle>Descriptions</CardTitle>
               <CardDescription>Add product descriptions</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {descriptionFields.map((field, index) => (
+              {form.descriptionFields.map((field, index) => (
                 <FormField
                   key={field.id}
                   control={form.control}
@@ -381,16 +260,16 @@ export default function AddProductPage() {
                         <FormControl>
                           <Textarea
                             placeholder="Enter product description"
-                            className="flex-1"
+                            className="flex-1 bg-accent"
                             {...field}
                           />
                         </FormControl>
-                        {descriptionFields.length > 1 && (
+                        {form.descriptionFields.length > 1 && (
                           <Button
                             type="button"
                             variant="outline"
                             size="icon"
-                            onClick={() => removeDescription(index)}
+                            onClick={() => form.removeDescription(index)}
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -403,7 +282,7 @@ export default function AddProductPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => appendDescription("")}
+                onClick={() => form.appendDescription("")}
                 className="w-full"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -413,7 +292,7 @@ export default function AddProductPage() {
           </Card>
 
           {/* Advantages */}
-          <Card>
+          <Card className="shadow-none">
             <CardHeader>
               <CardTitle>Advantages</CardTitle>
               <CardDescription>
@@ -421,7 +300,7 @@ export default function AddProductPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {advantageFields.map((field, index) => (
+              {form.advantageFields.map((field, index) => (
                 <FormField
                   key={field.id}
                   control={form.control}
@@ -432,16 +311,16 @@ export default function AddProductPage() {
                         <FormControl>
                           <Input
                             placeholder="Enter product advantage"
-                            className="flex-1"
+                            className="flex-1 bg-accent"
                             {...field}
                           />
                         </FormControl>
-                        {advantageFields.length > 1 && (
+                        {form.advantageFields.length > 1 && (
                           <Button
                             type="button"
                             variant="outline"
                             size="icon"
-                            onClick={() => removeAdvantage(index)}
+                            onClick={() => form.removeAdvantage(index)}
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -454,7 +333,7 @@ export default function AddProductPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => appendAdvantage("")}
+                onClick={() => form.appendAdvantage("")}
                 className="w-full"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -464,13 +343,13 @@ export default function AddProductPage() {
           </Card>
 
           {/* Ingredients */}
-          <Card>
+          <Card className="shadow-none">
             <CardHeader>
               <CardTitle>Ingredients</CardTitle>
               <CardDescription>List all product ingredients</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {ingredientFields.map((field, index) => (
+              {form.ingredientFields.map((field, index) => (
                 <FormField
                   key={field.id}
                   control={form.control}
@@ -481,16 +360,16 @@ export default function AddProductPage() {
                         <FormControl>
                           <Input
                             placeholder="Enter ingredient"
-                            className="flex-1"
+                            className="flex-1 bg-accent"
                             {...field}
                           />
                         </FormControl>
-                        {ingredientFields.length > 1 && (
+                        {form.ingredientFields.length > 1 && (
                           <Button
                             type="button"
                             variant="outline"
                             size="icon"
-                            onClick={() => removeIngredient(index)}
+                            onClick={() => form.removeIngredient(index)}
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -503,7 +382,7 @@ export default function AddProductPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => appendIngredient("")}
+                onClick={() => form.appendIngredient("")}
                 className="w-full"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -513,7 +392,7 @@ export default function AddProductPage() {
           </Card>
 
           {/* Additional Information */}
-          <Card>
+          <Card className="shadow-none">
             <CardHeader>
               <CardTitle>Additional Information</CardTitle>
               <CardDescription>
@@ -529,7 +408,11 @@ export default function AddProductPage() {
                     <FormItem>
                       <FormLabel>Weight *</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., 100g, 250ml" {...field} />
+                        <Input
+                          placeholder="e.g., 100g, 250ml"
+                          {...field}
+                          className="bg-accent"
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -544,6 +427,7 @@ export default function AddProductPage() {
                         <Input
                           placeholder="e.g., 10cm x 5cm x 3cm"
                           {...field}
+                          className="bg-accent"
                         />
                       </FormControl>
                     </FormItem>
@@ -560,6 +444,7 @@ export default function AddProductPage() {
                       <Textarea
                         placeholder="How to use this product"
                         {...field}
+                        className="bg-accent"
                       />
                     </FormControl>
                   </FormItem>
@@ -575,6 +460,7 @@ export default function AddProductPage() {
                       <Textarea
                         placeholder="Any warnings or precautions"
                         {...field}
+                        className="bg-accent"
                       />
                     </FormControl>
                   </FormItem>
@@ -584,13 +470,13 @@ export default function AddProductPage() {
           </Card>
 
           {/* Images */}
-          <Card>
+          <Card className="shadow-none">
             <CardHeader>
               <CardTitle>Product Images</CardTitle>
               <CardDescription>Add product image URLs</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {imageFields.map((field, index) => (
+              {form.imageFields.map((field, index) => (
                 <FormField
                   key={field.id}
                   control={form.control}
@@ -601,16 +487,16 @@ export default function AddProductPage() {
                         <FormControl>
                           <Input
                             placeholder="Enter image URL"
-                            className="flex-1"
+                            className="flex-1 bg-accent"
                             {...field}
                           />
                         </FormControl>
-                        {imageFields.length > 1 && (
+                        {form.imageFields.length > 1 && (
                           <Button
                             type="button"
                             variant="outline"
                             size="icon"
-                            onClick={() => removeImage(index)}
+                            onClick={() => form.removeImage(index)}
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -623,7 +509,7 @@ export default function AddProductPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => appendImage("")}
+                onClick={() => form.appendImage("")}
                 className="w-full"
               >
                 <Upload className="h-4 w-4 mr-2" />
@@ -633,7 +519,7 @@ export default function AddProductPage() {
           </Card>
 
           {/* Inventory */}
-          <Card>
+          <Card className="shadow-none">
             <CardHeader>
               <CardTitle>Inventory</CardTitle>
               <CardDescription>
@@ -644,7 +530,7 @@ export default function AddProductPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="inventoryQuantity"
+                  name="stock"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Initial Quantity *</FormLabel>
@@ -657,6 +543,7 @@ export default function AddProductPage() {
                           onChange={(e) =>
                             field.onChange(parseInt(e.target.value) || 0)
                           }
+                          className="bg-accent"
                         />
                       </FormControl>
                     </FormItem>
@@ -664,10 +551,10 @@ export default function AddProductPage() {
                 />
                 <FormField
                   control={form.control}
-                  name="inventorySold"
+                  name="sold"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Already Sold</FormLabel>
+                      <FormLabel>Initial Quantity *</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -677,6 +564,7 @@ export default function AddProductPage() {
                           onChange={(e) =>
                             field.onChange(parseInt(e.target.value) || 0)
                           }
+                          className="bg-accent"
                         />
                       </FormControl>
                     </FormItem>

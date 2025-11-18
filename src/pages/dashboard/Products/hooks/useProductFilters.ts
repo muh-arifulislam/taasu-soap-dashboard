@@ -36,7 +36,3 @@ export const useProductFilters = () => {
     setSorting,
   };
 };
-
-export const useProductOperations = () => {
-  return {};
-};

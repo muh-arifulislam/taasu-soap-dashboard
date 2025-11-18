@@ -11,7 +11,7 @@ import OrderDetails from "@/pages/dashboard/Orders/Details";
 import Payments from "@/pages/dashboard/Payments";
 import Products from "@/pages/dashboard/Products";
 import CategoriesPage from "@/pages/dashboard/Products/categories";
-import AddProductPage from "@/pages/dashboard/Products/add/CreateProduct";
+import AddProductPage from "@/pages/dashboard/Products/add";
 import DiscountsPage from "@/pages/dashboard/Products/discounts";
 import ProfilePage from "@/pages/dashboard/Profile";
 import Users from "@/pages/dashboard/Users";

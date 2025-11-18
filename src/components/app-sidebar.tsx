@@ -35,12 +35,8 @@ const data = {
       icon: Box,
       items: [
         {
-          title: "Products List",
+          title: "Manage Products",
           url: "/dashboard/products",
-        },
-        {
-          title: "Add Product",
-          url: "/dashboard/products/create",
         },
         {
           title: "Manage Categories",
@@ -59,7 +55,7 @@ const data = {
       isActive: false,
       items: [
         {
-          title: "List",
+          title: "Manage Inventories",
           url: "/dashboard/inventories",
         },
       ],
@@ -71,7 +67,7 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "List",
+          title: "Manage Orders",
           url: "/dashboard/orders",
         },
       ],
@@ -82,7 +78,7 @@ const data = {
       icon: Users,
       items: [
         {
-          title: "List",
+          title: "Manage Customers",
           url: "/dashboard/customers",
         },
       ],
@@ -93,7 +89,7 @@ const data = {
       icon: CreditCard,
       items: [
         {
-          title: "List",
+          title: "Manage Payments",
           url: "/dashboard/payments",
         },
       ],
@@ -106,12 +102,8 @@ const data = {
       icon: UserCircle,
       items: [
         {
-          title: "List",
+          title: "Manage Users",
           url: "/dashboard/users",
-        },
-        {
-          title: "Create",
-          url: "/dashboard/users/create",
         },
       ],
     },
