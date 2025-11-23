@@ -6,7 +6,8 @@ import type { TOrder } from "@/types";
 import type { ColumnDef } from "@tanstack/react-table";
 import { NavLink } from "react-router-dom";
 import dayjs from "dayjs";
-import { OrderActionCell } from "./OrderActionCell";
+import { OrderActionCell } from "./action-cell";
+import { cn } from "@/lib/utils";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -63,15 +64,14 @@ export const columns: ColumnDef<TOrder>[] = [
     accessorKey: "user",
     header: "Customer",
     cell: ({ row }) => {
-      const user: { _id: string; firstName: string; lastName: string } =
-        row.getValue("user");
+      const user: { _id: string; fullName: string } = row.getValue("user");
 
       return (
         <NavLink
           to={`/dashboard/customers/${user?._id}`}
           className={"hover:underline"}
         >
-          {user?.firstName} {user?.lastName}
+          {user.fullName}
         </NavLink>
       );
     },
@@ -83,17 +83,18 @@ export const columns: ColumnDef<TOrder>[] = [
       const payment: { status: string } = row.getValue("payment");
       return (
         <Button
-          variant={
-            payment?.status === "paid"
-              ? "default"
-              : payment?.status === "pending"
-              ? "secondary"
-              : "destructive"
-          }
-          className="pointer-events-none capitalize"
+          variant={"outline"}
           size="sm"
+          className={cn(
+            "pointer-events-none capitalize",
+            `${
+              payment.status === "paid"
+                ? "border-green-600 border-text-600"
+                : "border-amber-600 text-amber-600"
+            }`
+          )}
         >
-          {payment?.status || "unknown"}
+          {payment?.status}
         </Button>
       );
     },
@@ -110,9 +111,21 @@ export const columns: ColumnDef<TOrder>[] = [
     accessorKey: "orderStatus",
     header: "Order Status",
     cell: ({ row }) => {
+      const status: string = row.getValue("orderStatus");
+
       return (
-        <Button variant={"outline"} size="sm">
-          {row.getValue("orderStatus")}
+        <Button
+          size="sm"
+          className={cn(
+            "w-full max-w-26",
+            `${
+              status === "Completed"
+                ? "bg-green-800 hover:bg-green-700"
+                : "bg-amber-600 hover:bg-amber-500"
+            }`
+          )}
+        >
+          {status}
         </Button>
       );
     },
