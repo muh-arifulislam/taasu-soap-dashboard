@@ -1,7 +1,7 @@
-export interface IInventory {
+export interface Inventory {
+  _id: string;
   quantity: number;
   sold?: number;
-  deletedAt?: Date;
 
   createdAt: Date;
   updatedAt: Date;

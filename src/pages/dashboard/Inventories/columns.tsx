@@ -1,18 +1,13 @@
 import { Checkbox } from "@/components/ui/checkbox";
-import type { Product } from "@/types";
+import type { Inventory } from "@/types";
 import type { ColumnDef } from "@tanstack/react-table";
-// import { ProductActionCell } from "./action-cell";
 import { Badge } from "@/components/ui/badge";
-
 import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
+import { InventoryActionCell } from "./action-cell";
+import type { ExtendedInventory } from "@/redux/features/products/productInventoryApi";
 
 interface ColumnActions {
-  handleEdit: (discount: Product) => void;
-  handleDelete: (discountId: string) => void;
-  handleViewProduct: (product: Product) => void;
+  handleEdit: (inventory: Inventory) => void;
 }
 
 const getStockStatus = (quantity: number) => {
@@ -35,7 +30,9 @@ const getStockStatus = (quantity: number) => {
   };
 };
 
-export const columns = (actions: ColumnActions): ColumnDef<Product>[] => [
+export const columns = (
+  actions: ColumnActions
+): ColumnDef<ExtendedInventory>[] => [
   {
     id: "_id",
     header: ({ table }) => (
@@ -61,12 +58,17 @@ export const columns = (actions: ColumnActions): ColumnDef<Product>[] => [
   {
     accessorKey: "name",
     header: "Name",
+    cell: ({ row }) => {
+      const product = row.original.products;
+      return <span className="font-mono text-sm">{product.name}</span>;
+    },
   },
   {
     accessorKey: "sku",
     header: "SKU",
     cell: ({ row }) => {
-      return <span className="font-mono text-sm">{row.getValue("sku")}</span>;
+      const product = row.original.products;
+      return <span className="font-mono text-sm">{product.sku}</span>;
     },
   },
 
@@ -74,9 +76,9 @@ export const columns = (actions: ColumnActions): ColumnDef<Product>[] => [
     accessorKey: "inventoryId",
     header: "Stock",
     cell: ({ row }) => {
-      const product = row.original;
+      const inventory = row.original;
 
-      const stock = product.inventory.quantity - product.inventory.sold;
+      const stock = inventory.quantity - (inventory?.sold ?? 0);
 
       const stockStatus = getStockStatus(stock);
 
@@ -94,18 +96,17 @@ export const columns = (actions: ColumnActions): ColumnDef<Product>[] => [
     accessorKey: "inventoryId" + "sold",
     header: "Sold",
     cell: ({ row }) => {
-      const product = row.original;
-      return <span>{product.inventory.sold}</span>;
+      const inventory = row.original;
+      return <span>{inventory.sold}</span>;
     },
   },
   {
     accessorKey: "inventoryId" + "status",
     header: "Status",
     cell: ({ row }) => {
-      const product = row.original;
+      const inventory = row.original;
 
-      const stock =
-        product.inventory?.quantity || 0 - product.inventory?.sold || 0;
+      const stock = inventory.quantity - (inventory?.sold ?? 0);
 
       const stockStatus = getStockStatus(stock);
       return <Badge className={stockStatus.color}>{stockStatus.status}</Badge>;
@@ -125,17 +126,11 @@ export const columns = (actions: ColumnActions): ColumnDef<Product>[] => [
     enableHiding: false,
     header: "Actions",
     cell: ({ row }) => {
-      const product = row.original;
+      const inventory = row.original;
 
-      return null;
-
-      //   return (
-      //     <ProductActionCell
-      //       handleEdit={() => actions.handleEdit(product)}
-      //       handleDelete={() => actions.handleDelete(product._id)}
-      //       handleViewProduct={() => actions.handleViewProduct(product)}
-      //     />
-      //   );
+      return (
+        <InventoryActionCell handleEdit={() => actions.handleEdit(inventory)} />
+      );
     },
   },
 ];
