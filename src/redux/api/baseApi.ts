@@ -40,6 +40,7 @@ const baseQueryWithRefreshToken: BaseQueryFn<
   if (result?.error?.status === 401) {
     dispatch(logout());
   }
+
   if (result?.error?.status === 404) {
     toast.error((result?.error?.data as any)?.message);
   }

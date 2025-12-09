@@ -36,11 +36,12 @@ export const columns: ColumnDef<IUser>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "fullName",
+    accessorKey: "firstName",
     header: "Name",
     cell: ({ row }) => {
-      const fullName: string = row.getValue("fullName");
-      return <span>{fullName.length < 2 ? "N/A" : fullName}</span>;
+      const user = row.original;
+      const fullName = `${user.firstName ?? ""} ${user.lastName ?? ""}`;
+      return <span>{fullName ?? "N/A"}</span>;
     },
   },
   {
@@ -72,7 +73,7 @@ export const columns: ColumnDef<IUser>[] = [
     header: "Phone",
     cell: ({ row }) => {
       const phoneNumber: string = row.getValue("mobile");
-      return <span>{phoneNumber ?? "N/A"}</span>;
+      return <span>{phoneNumber?.length > 0 ? phoneNumber : "N/A"}</span>;
     },
   },
   {

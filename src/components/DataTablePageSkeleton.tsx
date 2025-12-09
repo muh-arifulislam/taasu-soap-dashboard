@@ -1,4 +1,3 @@
-import React from "react";
 import { Skeleton } from "./ui/skeleton";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Separator } from "./ui/separator";

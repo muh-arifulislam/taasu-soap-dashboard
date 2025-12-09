@@ -13,7 +13,7 @@ interface CustomerDetailsProps {
 
 export default function CustomerDetailsCard({ data }: CustomerDetailsProps) {
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md  rounded-md shadow-none">
       <CardHeader>
         <div className="flex items-center justify-between pb-2">
           <CardTitle className="text-lg font-semibold">

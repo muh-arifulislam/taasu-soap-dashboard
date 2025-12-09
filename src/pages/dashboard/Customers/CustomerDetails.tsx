@@ -88,7 +88,7 @@ export default function CustomerDetails() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto">
+    <div className="flex flex-col gap-6  max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" asChild>
@@ -143,7 +143,7 @@ export default function CustomerDetails() {
         <div className="md:col-span-2 space-y-6">
           {/* Stats Cards */}
           <div className="grid gap-4 md:grid-cols-3">
-            <Card>
+            <Card className="rounded-md shadow-none">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Total Orders
@@ -160,7 +160,7 @@ export default function CustomerDetails() {
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="rounded-md shadow-none">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Total Spent
@@ -174,7 +174,7 @@ export default function CustomerDetails() {
                 <p className="text-xs text-muted-foreground">Lifetime value</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="rounded-md shadow-none">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Avg Order Value
@@ -191,7 +191,7 @@ export default function CustomerDetails() {
           </div>
 
           {/* Orders Table */}
-          <Card>
+          <Card className="rounded-md shadow-none">
             <CardHeader>
               <CardTitle>Order History</CardTitle>
             </CardHeader>
@@ -254,7 +254,7 @@ export default function CustomerDetails() {
         {/* Customer Details Sidebar */}
         <div className="space-y-6">
           {/* Contact Information */}
-          <Card>
+          <Card className="rounded-md shadow-none">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-4 w-4" />
@@ -293,7 +293,7 @@ export default function CustomerDetails() {
           </Card>
 
           {/* Billing Address */}
-          <Card>
+          <Card className="rounded-md shadow-none">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
@@ -314,7 +314,7 @@ export default function CustomerDetails() {
           </Card>
 
           {/* Shipping Address */}
-          <Card>
+          <Card className="rounded-md shadow-none">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
@@ -335,7 +335,7 @@ export default function CustomerDetails() {
           </Card>
 
           {/* Quick Actions */}
-          <Card>
+          <Card className="rounded-md shadow-none">
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>

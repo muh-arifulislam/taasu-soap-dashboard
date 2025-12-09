@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PRODUCT_CATEGORY_TYPES } from "../constant";
 import { useCallback } from "react";
 
-export const useCategoryForm = (editingCategory: ProductCategory | null) => {
+export const useCategoryForm = () => {
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues: {

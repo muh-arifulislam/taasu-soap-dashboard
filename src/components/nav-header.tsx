@@ -1,11 +1,4 @@
-import {
-  BadgeCheck,
-  Bell,
-  LogOut,
-  MessageCircle,
-  Moon,
-  Sun,
-} from "lucide-react";
+import { BadgeCheck, LogOut, Moon, Sun } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -23,6 +16,7 @@ import { useAppDispatch } from "@/redux/hooks";
 import { useNavigate } from "react-router-dom";
 import { logout } from "@/redux/features/auth/authSlice";
 import { useTheme } from "./theme-provider";
+import { NotificationDropdown } from "./notification-dropdown";
 
 export default function NavHeader({
   user,
@@ -44,15 +38,13 @@ export default function NavHeader({
   return (
     <div className="flex items-center justify-between px-4 py-3">
       <div className="flex items-center gap-3">
-        <div>
+        {/* <div>
           <Button variant="outline" size="icon">
             <MessageCircle />
           </Button>
-        </div>
+        </div> */}
         <div>
-          <Button variant="outline" size="icon">
-            <Bell className="h-[1.2rem] w-[1.2rem] transition-all" />
-          </Button>
+          <NotificationDropdown />
         </div>
         <div>
           <DropdownMenu>

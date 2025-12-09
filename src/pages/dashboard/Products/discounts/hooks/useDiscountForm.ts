@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useCallback } from "react";
 
-export const useDiscountForm = (editingDiscount: ProductDiscount | null) => {
+export const useDiscountForm = () => {
   const form = useForm<DiscountFormData>({
     resolver: zodResolver(discountSchema),
     defaultValues: {

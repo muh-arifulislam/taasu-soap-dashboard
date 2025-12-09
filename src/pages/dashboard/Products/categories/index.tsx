@@ -43,7 +43,7 @@ export default function CategoriesPage() {
     useState<ProductCategory | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useCategoryForm(editingCategory);
+  const form = useCategoryForm();
 
   const {
     data: response,

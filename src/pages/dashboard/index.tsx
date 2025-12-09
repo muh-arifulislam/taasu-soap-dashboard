@@ -36,6 +36,7 @@ import {
   TrendingUp,
   MoreHorizontal,
   Eye,
+  Download,
 } from "lucide-react";
 import {
   Line,
@@ -50,6 +51,9 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { useState } from "react";
+import { useGetKeyMetricsQuery } from "@/redux/features/stats/statsApi";
+import Loading from "./loading";
 
 // Sample data
 const salesData = [
@@ -116,14 +120,67 @@ const chartConfig = {
 };
 
 export default function DashboardPage() {
+  const { data, isLoading, isError } = useGetKeyMetricsQuery(undefined);
+
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadReport = async () => {
+    setIsDownloading(true);
+
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Create CSV content
+    const csvContent = generateCSVContent();
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `ecommerce-report-${new Date().toISOString().split("T")[0]}.csv`
+    );
+    link.style.visibility = "hidden";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setIsDownloading(false);
+  };
+  const generateCSVContent = () => {
+    const headers = ["Month", "Sales", "Orders", "Revenue"];
+    const rows = salesData.map(
+      (row) => `${row.month},${row.orders},${row.revenue}`
+    );
+
+    return [headers, ...rows].join("\n");
+  };
+
+  if (isLoading) {
+    return <Loading />;
+  }
+  if (isError) {
+    return <div>failed to fetch data...</div>;
+  }
+
   return (
     <div className="flex-1 space-y-4">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        {/* <div className="flex items-center space-x-2">
-          <Button variant="outline">Download Report</Button>
-          <Button>View Analytics</Button>
-        </div> */}
+        <div className="flex items-center space-x-2">
+          <Button
+            onClick={handleDownloadReport}
+            disabled={isDownloading}
+            className="flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            {isDownloading ? "Downloading..." : "Download Report"}
+          </Button>
+        </div>
       </div>
 
       {/* Key Metrics */}
@@ -134,14 +191,10 @@ export default function DashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600 flex items-center">
-                <ArrowUpRight className="h-3 w-3 mr-1" />
-                +20.1%
-              </span>
-              from last month
-            </p>
+            <div className="text-2xl font-bold">
+              ${data?.data?.revenue?.amount}
+            </div>
+            {GrowthIcon(data?.data?.revenue?.growth ?? 0)}
           </CardContent>
         </Card>
 
@@ -151,14 +204,10 @@ export default function DashboardPage() {
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+2,350</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600 flex items-center">
-                <ArrowUpRight className="h-3 w-3 mr-1" />
-                +180.1%
-              </span>
-              from last month
-            </p>
+            <div className="text-2xl font-bold">
+              +{data?.data?.orders?.count}
+            </div>
+            {GrowthIcon(data?.data?.orders?.growth ?? 0)}
           </CardContent>
         </Card>
 
@@ -168,14 +217,10 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+12,234</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600 flex items-center">
-                <ArrowUpRight className="h-3 w-3 mr-1" />
-                +19%
-              </span>
-              from last month
-            </p>
+            <div className="text-2xl font-bold">
+              +{data?.data?.customers?.count}
+            </div>
+            {GrowthIcon(data?.data?.customers?.growth ?? 0)}
           </CardContent>
         </Card>
 
@@ -187,20 +232,16 @@ export default function DashboardPage() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">573</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-red-600 flex items-center">
-                <ArrowDownRight className="h-3 w-3 mr-1" />
-                -2%
-              </span>
-              from last month
-            </p>
+            <div className="text-2xl font-bold">
+              {data?.data?.products?.total}
+            </div>
+            {GrowthIcon(0)}
           </CardContent>
         </Card>
       </div>
 
       {/* Charts Section */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-y-4 md:gap-y-0 gap-x-0 md:gap-x-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
             <CardTitle>Revenue Overview</CardTitle>
@@ -350,3 +391,25 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+const GrowthIcon = (growth: number) => {
+  if (growth >= 0) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        <span className="text-green-600 flex items-center">
+          <ArrowUpRight className="h-3 w-3 mr-1" />+{growth}%
+        </span>
+        from last month
+      </p>
+    );
+  }
+  return (
+    <p className="text-xs text-muted-foreground">
+      <span className="text-red-600 flex items-center">
+        <ArrowDownRight className="h-3 w-3 mr-1" />
+        {growth}%
+      </span>
+      from last month
+    </p>
+  );
+};

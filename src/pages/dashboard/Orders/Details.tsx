@@ -44,89 +44,98 @@ const OrderDetails: React.FC = () => {
     <>
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="col-span-1 sm:col-span-3 grid grid-cols-1 gap-4">
-          <div className="border rounded p-4">
-            <div className="mb-4">
-              <div className="flex items-center gap-3 mb-3">
-                <h4 className="text-xl font-medium">#{data?.data?.orderId}</h4>
-                <Button size={"sm"} className="bg-slate-50 text-green-600">
-                  {data?.data?.payment?.status ?? "Unknown"}
-                </Button>
-                <Button size={"sm"} variant={"outline"}>
-                  {data?.data?.orderStatus}
-                </Button>
+          <Card className="rounded-md shadow-none">
+            <CardContent>
+              <div className="mb-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <h4 className="text-xl font-medium">
+                    #{data?.data?.orderId}
+                  </h4>
+                  <Button
+                    size={"sm"}
+                    className="bg-slate-50 dark:bg-slate-50/10 text-green-600"
+                  >
+                    {data?.data?.payment?.status ?? "Unknown"}
+                  </Button>
+                  <Button size={"sm"} variant={"outline"}>
+                    {data?.data?.orderStatus}
+                  </Button>
+                </div>
+                <div>
+                  <h5 className="text-sm">
+                    Order / Order Details / #{data?.data?.orderId} -{" "}
+                    {dayjs(data?.data?.createdAt).format(
+                      "MMMM D, YYYY [at] h:mm a"
+                    )}
+                  </h5>
+                </div>
               </div>
-              <div>
-                <h5 className="text-sm">
-                  Order / Order Details / #{data?.data?.orderId} -{" "}
-                  {dayjs(data?.data?.createdAt).format(
-                    "MMMM D, YYYY [at] h:mm a"
-                  )}
-                </h5>
+              <div className="flex flex-col sm:flex-row items-center justify-between">
+                <Button variant={"secondary"} className="font-regular">
+                  Estimated shipping date :{" "}
+                  {dayjs(data?.data?.createdAt)
+                    .add(7, "day")
+                    .format("MMMM D, YYYY")}
+                </Button>
+                <UpdateOrderStatusButton
+                  orderId={data?.data?._id}
+                  currentStatus={data?.data?.orderStatus}
+                />
               </div>
-            </div>
-            <div className="flex flex-col sm:flex-row items-center justify-between">
-              <Button variant={"secondary"} className="font-regular">
-                Estimated shipping date :{" "}
-                {dayjs(data?.data?.createdAt)
-                  .add(7, "day")
-                  .format("MMMM D, YYYY")}
-              </Button>
-              <UpdateOrderStatusButton
-                orderId={data?.data?._id}
-                currentStatus={data?.data?.orderStatus}
-              />
-            </div>
-          </div>
-          <div className="">
-            <Card>
-              <CardHeader className="pb-0">
-                <CardTitle className="">Products</CardTitle>
-              </CardHeader>
-              <Separator />
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Image</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Quantity</TableHead>
+            </CardContent>
+          </Card>
+          <Card className="rounded-md shadow-none">
+            <CardHeader className="pb-0">
+              <CardTitle className="">Products</CardTitle>
+            </CardHeader>
+            <Separator />
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Image</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Quantity</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data?.data?.items?.map((item: any) => (
+                    <TableRow key={item?.product?._id}>
+                      <TableCell>
+                        {/* Replace with actual product image if available */}
+                        <Avatar>
+                          <AvatarImage
+                            src={
+                              item?.product?.images?.length
+                                ? item?.product?.images[0]
+                                : ""
+                            }
+                          />
+                          <AvatarFallback>IMG</AvatarFallback>
+                        </Avatar>
+                      </TableCell>
+                      <TableCell>
+                        {/* Replace with actual product name if available */}
+                        {item?.product?.name}
+                      </TableCell>
+                      <TableCell>${item?.price}</TableCell>
+                      <TableCell>{item?.quantity}</TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {data?.data?.items.map((item: any) => (
-                      <TableRow key={item?.product?._id}>
-                        <TableCell>
-                          {/* Replace with actual product image if available */}
-                          <Avatar>
-                            <AvatarImage src={item?.product?.images[0]} />
-                            <AvatarFallback>IMG</AvatarFallback>
-                          </Avatar>
-                        </TableCell>
-                        <TableCell>
-                          {/* Replace with actual product name if available */}
-                          {item?.product?.name}
-                        </TableCell>
-                        <TableCell>${item?.price}</TableCell>
-                        <TableCell>{item?.quantity}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="">
-            <OrderStatusHistory
-              statusHistory={data?.data?.statusHistory}
-              orderNumber={data?.data?.orderId}
-            />
-          </div>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+          <OrderStatusHistory
+            statusHistory={data?.data?.statusHistory}
+            orderNumber={data?.data?.orderId}
+          />
         </div>
         <div>
           <div className="grid grid-cols-1 gap-4">
             <div className="">
-              <Card className="w-full">
+              <Card className="w-full rounded-md shadow-none">
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold">
                     Order Summary

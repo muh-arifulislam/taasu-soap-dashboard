@@ -24,14 +24,14 @@ const Users: React.FC = () => {
 
   // Trigger fetch
   const { data, isLoading, refetch } = useGetAdminUsersQuery({
-    searchTerm: filter.debouncedSearchTerm,
+    search: filter.debouncedSearchTerm,
     sortBy,
     sortOrder: sortOrder as "asc" | "desc",
     page: pagination.page,
     limit: pagination.limit,
   });
 
-  const total = data?.meta.total || 0;
+  const total = data?.meta?.total || 0;
   const totalPages = Math.ceil(total / pagination.limit);
 
   // 🧠 Memoize heavy DataTable

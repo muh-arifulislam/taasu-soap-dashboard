@@ -43,10 +43,10 @@ export const columns: ColumnDef<IPayment>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "_id",
-    header: "ID",
+    accessorKey: "paymentId",
+    header: "Payment ID",
     cell: ({ row }) => {
-      return <span>{row.getValue("_id")}</span>;
+      return <span>{row.getValue("paymentId")}</span>;
     },
   },
   {

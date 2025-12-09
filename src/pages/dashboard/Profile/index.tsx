@@ -20,7 +20,6 @@ import { Switch } from "@/components/ui/switch";
 import { useGetMeQuery } from "@/redux/features/users/userApi";
 import ProfileForm from "@/components/form/ProfileForm";
 import PasswordChangeForm from "@/components/form/PasswordChangeForm";
-import { useTheme } from "@/components/theme-provider";
 
 const userRoles = {
   customer: "Customer",
@@ -30,8 +29,6 @@ const userRoles = {
 };
 
 export default function ProfilePage() {
-  const { setTheme } = useTheme();
-
   const [isEditing, setIsEditing] = useState(false);
 
   const { data, isLoading } = useGetMeQuery(undefined);

@@ -60,7 +60,7 @@ export default function OrderStatusHistory({
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full rounded-md shadow-none">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold">Order Status</CardTitle>
@@ -89,7 +89,7 @@ export default function OrderStatusHistory({
               {/* Status Icon */}
               <div
                 className={cn(
-                  "flex items-center justify-center w-12 h-12 rounded-full border-2 z-10 border-green-200 bg-green-50"
+                  "flex items-center justify-center w-12 h-12 rounded-full border-2 z-10 border-green-200 dark:border-green-200/10 bg-green-50 dark:bg-green-50/10"
                 )}
               >
                 {getStatusIcon(item.status)}
@@ -119,10 +119,10 @@ export default function OrderStatusHistory({
         </div>
 
         {/* Estimated Delivery */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-50/10 rounded-lg border border-blue-200 dark:border-blue-200/10">
           <div className="flex items-center space-x-2">
             <Truck className="h-4 w-4 text-blue-600" />
-            <span className="text-sm font-medium text-blue-900">
+            <span className="text-sm font-medium text-blue-900 dark:text-white">
               Estimated Delivery:{" "}
               {statusHistory?.length &&
                 dayjs(statusHistory[0]?.timestamp)

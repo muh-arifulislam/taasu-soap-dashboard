@@ -113,7 +113,7 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useAppSelector(selectCurrentUser);
 
-  const { data: userData } = useGetMeQuery(undefined);
+  const { data: userData, isLoading } = useGetMeQuery(undefined);
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -141,11 +141,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter>
         <NavUser
-          user={{
-            name: `${userData?.data?.firstName} ${userData?.data?.lastName}`,
-            email: userData?.data?.email ?? "example@gmail.com",
-            avatar: "",
+          data={{
+            fullName: userData?.data?.fullName,
+            email: userData?.data?.email,
           }}
+          isLoading={isLoading}
         />
       </SidebarFooter>
       <SidebarRail />

@@ -18,6 +18,7 @@ import Users from "@/pages/dashboard/Users";
 import CreateUserPage from "@/pages/dashboard/Users/Create";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import InventoriesPage from "@/pages/dashboard/Inventories";
+import NotificationsPage from "@/pages/dashboard/Notifications";
 
 export const router = createBrowserRouter([
   {
@@ -61,6 +62,10 @@ export const router = createBrowserRouter([
       {
         path: "customers",
         element: <Customers />,
+      },
+      {
+        path: "notifications",
+        element: <NotificationsPage />,
       },
       {
         path: "customers/:id",

@@ -47,7 +47,7 @@ export default function DiscountsPage() {
   const [editingDiscount, setEditingDiscount] =
     useState<ProductDiscount | null>(null);
 
-  const form = useDiscountForm(editingDiscount);
+  const form = useDiscountForm();
 
   //pagination
   const total = response?.meta?.total || 0;
