@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   ChevronLeft,
@@ -12,74 +12,31 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NavLink } from "react-router-dom";
+import { useAdminNotifications } from "@/sockets/useAdminNotifications";
+import { useGetAdminNotificationsQuery } from "@/redux/features/notifications/notificationApi";
+import { NotificationsPageLoading } from "./loading";
 
 interface Notification {
-  id: string;
+  _id: string;
   type: "order" | "inventory" | "success" | "alert";
   title: string;
   message: string;
-  timestamp: string;
-  read: boolean;
+  createdAt: string;
+  isRead: boolean;
 }
 
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    type: "order",
-    title: "New Order Received",
-    message: "Order #12345 from Sarah Anderson for $299.99",
-    timestamp: "5 minutes ago",
-    read: false,
-  },
-  {
-    id: "2",
-    type: "inventory",
-    title: "Low Stock Alert",
-    message: "Blue T-Shirt size M is running low (5 units left)",
-    timestamp: "1 hour ago",
-    read: false,
-  },
-  {
-    id: "3",
-    type: "success",
-    title: "Payment Confirmed",
-    message: "Payment from Order #12343 has been processed successfully",
-    timestamp: "2 hours ago",
-    read: true,
-  },
-  {
-    id: "4",
-    type: "alert",
-    title: "Refund Request",
-    message: "Customer requested refund for Order #12340 - Action required",
-    timestamp: "3 hours ago",
-    read: true,
-  },
-  {
-    id: "5",
-    type: "order",
-    title: "Order Shipped",
-    message: "Order #12339 has been shipped and is on its way",
-    timestamp: "5 hours ago",
-    read: true,
-  },
-  {
-    id: "6",
-    type: "inventory",
-    title: "Restock Completed",
-    message: '250 units of "Premium Jeans Black" added to inventory',
-    timestamp: "1 day ago",
-    read: true,
-  },
-];
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState(mockNotifications);
-  const [filterType, setFilterType] = useState<"all" | "unread">("all");
+  const { data, isLoading } = useGetAdminNotificationsQuery(undefined);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const [notifications, setNotifications] = useState<[] | Notification[]>([]);
+  const [filterType, setFilterType] = useState<"all" | "unread">("all");
+  useAdminNotifications((data) => {
+    setNotifications((prev) => [data, ...prev]);
+  });
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
   const filteredNotifications =
     filterType === "unread"
-      ? notifications.filter((n) => !n.read)
+      ? notifications.filter((n) => !n.isRead)
       : notifications;
 
   const getIcon = (type: string) => {
@@ -99,21 +56,30 @@ export default function NotificationsPage() {
   };
 
   const markAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
+    setNotifications(notifications.map((n) => ({ ...n, isRead: true })));
   };
 
   const markAsRead = (id: string) => {
     setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
+      notifications.map((n) => (n._id === id ? { ...n, isRead: true } : n))
     );
   };
 
   const deleteNotification = (id: string) => {
-    setNotifications(notifications.filter((n) => n.id !== id));
+    setNotifications(notifications.filter((n) => n._id !== id));
   };
 
+  // Load from API
+  useEffect(() => {
+    if (data?.data) setNotifications(data.data);
+  }, [data]);
+
+  if (isLoading) {
+    return <NotificationsPageLoading />;
+  }
+
   return (
-    <main className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card">
         <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
@@ -174,9 +140,9 @@ export default function NotificationsPage() {
           {filteredNotifications.length > 0 ? (
             filteredNotifications.map((notification) => (
               <div
-                key={notification.id}
+                key={notification._id}
                 className={`border border-border rounded-lg p-4 transition-colors ${
-                  !notification.read ? "bg-secondary/20" : "bg-card"
+                  !notification.isRead ? "bg-secondary/60" : "bg-card"
                 } hover:bg-secondary/10`}
               >
                 <div className="flex gap-4">
@@ -191,7 +157,7 @@ export default function NotificationsPage() {
                       <div className="flex-1">
                         <p
                           className={`font-semibold ${
-                            !notification.read
+                            !notification.isRead
                               ? "text-foreground"
                               : "text-muted-foreground"
                           }`}
@@ -202,20 +168,20 @@ export default function NotificationsPage() {
                           {notification.message}
                         </p>
                       </div>
-                      {!notification.read && (
+                      {!notification.isRead && (
                         <div className="flex-shrink-0 h-3 w-3 rounded-full bg-primary mt-1.5"></div>
                       )}
                     </div>
                     <div className="mt-3 flex items-center justify-between">
                       <p className="text-xs text-muted-foreground/70">
-                        {notification.timestamp}
+                        {notification.createdAt}
                       </p>
                       <div className="flex gap-2">
-                        {!notification.read && (
+                        {!notification.isRead && (
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => markAsRead(notification.id)}
+                            onClick={() => markAsRead(notification._id)}
                             className="text-xs h-7"
                           >
                             Mark as read
@@ -224,7 +190,7 @@ export default function NotificationsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => deleteNotification(notification.id)}
+                          onClick={() => deleteNotification(notification._id)}
                           className="text-xs h-7 text-destructive hover:text-destructive"
                         >
                           Delete
@@ -250,6 +216,6 @@ export default function NotificationsPage() {
           )}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

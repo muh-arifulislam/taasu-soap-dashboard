@@ -12,6 +12,9 @@ import {
   REGISTER,
 } from "redux-persist";
 import authSlice from "./features/auth/authSlice";
+import { notificationApi } from "./api/notificationApi";
+import notificationReducer from "./features/notifications/notificationSlice";
+
 // ...
 
 const persistConfig = {
@@ -24,14 +27,16 @@ const persistAuthReducer = persistReducer(persistConfig, authSlice);
 export const store = configureStore({
   reducer: {
     [baseApi.reducerPath]: baseApi.reducer,
+    [notificationApi.reducerPath]: notificationApi.reducer,
     auth: persistAuthReducer,
+    notifications: notificationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(baseApi.middleware),
+    }).concat(baseApi.middleware, notificationApi.middleware),
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
