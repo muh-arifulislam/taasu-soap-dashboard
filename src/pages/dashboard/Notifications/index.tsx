@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 
 import {
   ChevronLeft,
@@ -12,28 +12,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NavLink } from "react-router-dom";
-import { useAdminNotifications } from "@/sockets/useAdminNotifications";
-import { useGetAdminNotificationsQuery } from "@/redux/features/notifications/notificationApi";
-import { NotificationsPageLoading } from "./loading";
 
-interface Notification {
-  _id: string;
-  type: "order" | "inventory" | "success" | "alert";
-  title: string;
-  message: string;
-  createdAt: string;
-  isRead: boolean;
-}
+import { selectAllNotifications } from "@/redux/features/notifications/notificationSlice";
+import { useAppSelector } from "@/redux/hooks";
+import { useNotificationsOperations } from "./hooks/useNotificationsOperations";
 
 export default function NotificationsPage() {
-  const { data, isLoading } = useGetAdminNotificationsQuery(undefined);
+  //RTK Query operations
+  const operations = useNotificationsOperations();
 
-  const [notifications, setNotifications] = useState<[] | Notification[]>([]);
-  const [filterType, setFilterType] = useState<"all" | "unread">("all");
-  useAdminNotifications((data) => {
-    setNotifications((prev) => [data, ...prev]);
-  });
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  // local state from adapter
+  const notifications = useAppSelector(selectAllNotifications);
+
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => !n.isRead).length,
+    [notifications]
+  );
+
+  const [filterType, setFilterType] = React.useState<"all" | "unread">("all");
   const filteredNotifications =
     filterType === "unread"
       ? notifications.filter((n) => !n.isRead)
@@ -55,28 +51,9 @@ export default function NotificationsPage() {
     }
   };
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, isRead: true })));
-  };
-
-  const markAsRead = (id: string) => {
-    setNotifications(
-      notifications.map((n) => (n._id === id ? { ...n, isRead: true } : n))
-    );
-  };
-
-  const deleteNotification = (id: string) => {
-    setNotifications(notifications.filter((n) => n._id !== id));
-  };
-
-  // Load from API
-  useEffect(() => {
-    if (data?.data) setNotifications(data.data);
-  }, [data]);
-
-  if (isLoading) {
-    return <NotificationsPageLoading />;
-  }
+  // if (isLoading) {
+  //   return <NotificationsPageLoading />;
+  // }
 
   return (
     <div className="min-h-screen bg-background">
@@ -126,7 +103,7 @@ export default function NotificationsPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={markAllAsRead}
+              onClick={operations.handleMarkAllAsRead}
               className="gap-2 bg-transparent"
             >
               <Check className="h-4 w-4" />
@@ -181,7 +158,9 @@ export default function NotificationsPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => markAsRead(notification._id)}
+                            onClick={() =>
+                              operations.handleMarkAsRead(notification._id)
+                            }
                             className="text-xs h-7"
                           >
                             Mark as read
@@ -190,7 +169,9 @@ export default function NotificationsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => deleteNotification(notification._id)}
+                          onClick={() =>
+                            operations.handleDelete(notification._id)
+                          }
                           className="text-xs h-7 text-destructive hover:text-destructive"
                         >
                           Delete

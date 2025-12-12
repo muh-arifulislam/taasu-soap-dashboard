@@ -4,17 +4,16 @@ import {
   type PayloadAction,
 } from "@reduxjs/toolkit";
 import type { NotificationDto } from "./types";
+import type { RootState } from "@/redux/store";
 
-const notificationsAdapter = createEntityAdapter<NotificationDto>({
-  selectId: (n) => n._id,
+const notificationsAdapter = createEntityAdapter({
+  selectId: (n: NotificationDto) => n._id,
   sortComparer: (a, b) => b.createdAt.localeCompare(a.createdAt),
 });
 
-const initialState = notificationsAdapter.getInitialState();
-
 const notificationSlice = createSlice({
   name: "notifications",
-  initialState,
+  initialState: notificationsAdapter.getInitialState(),
   reducers: {
     upsertManyNotifications(state, action: PayloadAction<NotificationDto[]>) {
       notificationsAdapter.upsertMany(state, action.payload);
@@ -59,4 +58,6 @@ export const {
   selectAll: selectAllNotifications,
   selectById: selectNotificationById,
   selectTotal: selectNotificationsTotal,
-} = notificationsAdapter.getSelectors((state) => state.notifications);
+} = notificationsAdapter.getSelectors<RootState>(
+  (state) => state.notifications
+);

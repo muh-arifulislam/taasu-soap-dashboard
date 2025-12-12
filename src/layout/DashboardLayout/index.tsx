@@ -10,13 +10,34 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { useGetAdminNotificationsQuery } from "@/redux/features/notifications/notificationApi";
+import { upsertManyNotifications } from "@/redux/features/notifications/notificationSlice";
+import type { NotificationDto } from "@/redux/features/notifications/types";
 import { useGetMeQuery } from "@/redux/features/users/userApi";
-import React from "react";
+import { useAppDispatch } from "@/redux/hooks";
+import { useAdminNotifications } from "@/sockets/useAdminNotifications";
+import React, { useEffect } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 
 import { useLocation } from "react-router-dom";
 
 export const DashboardLayout: React.FC = () => {
+  // initialize socket -> adds incoming notifications into redux
+  useAdminNotifications();
+
+  // Fetch from API
+  const { data: notificationsData } = useGetAdminNotificationsQuery(undefined);
+  const dispatch = useAppDispatch();
+
+  // upsert API data into the entity adapter slice on load
+  useEffect(() => {
+    if (notificationsData?.data) {
+      dispatch(
+        upsertManyNotifications(notificationsData.data as NotificationDto[])
+      );
+    }
+  }, [notificationsData, dispatch]);
+
   const breadcrumbNameMap: Record<string, string> = {
     dashboard: "Dashboard",
     products: "Products",

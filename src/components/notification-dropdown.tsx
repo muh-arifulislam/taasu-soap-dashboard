@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import {
   Bell,
   CheckCircle,
@@ -13,70 +11,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { NavLink } from "react-router-dom";
-
-export interface Notification {
-  id: string;
-  type: "order" | "inventory" | "success" | "alert";
-  title: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-}
-
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    type: "order",
-    title: "New Order Received",
-    message: "Order #12345 from Sarah Anderson for $299.99",
-    timestamp: "5 minutes ago",
-    read: false,
-  },
-  {
-    id: "2",
-    type: "inventory",
-    title: "Low Stock Alert",
-    message: "Blue T-Shirt size M is running low (5 units left)",
-    timestamp: "1 hour ago",
-    read: false,
-  },
-  {
-    id: "3",
-    type: "success",
-    title: "Payment Confirmed",
-    message: "Payment from Order #12343 has been processed successfully",
-    timestamp: "2 hours ago",
-    read: true,
-  },
-  {
-    id: "4",
-    type: "alert",
-    title: "Refund Request",
-    message: "Customer requested refund for Order #12340 - Action required",
-    timestamp: "3 hours ago",
-    read: true,
-  },
-  {
-    id: "5",
-    type: "order",
-    title: "Order Shipped",
-    message: "Order #12339 has been shipped and is on its way",
-    timestamp: "5 hours ago",
-    read: true,
-  },
-  {
-    id: "6",
-    type: "inventory",
-    title: "Restock Completed",
-    message: '250 units of "Premium Jeans Black" added to inventory',
-    timestamp: "1 day ago",
-    read: true,
-  },
-];
+import { useAppSelector } from "@/redux/hooks";
+import { selectAllNotifications } from "@/redux/features/notifications/notificationSlice";
+import { useNotificationsOperations } from "@/pages/dashboard/Notifications/hooks/useNotificationsOperations";
 
 export function NotificationDropdown() {
-  const [notifications, setNotifications] = useState(mockNotifications);
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const operations = useNotificationsOperations();
+
+  // local state from adapter
+  const notifications = useAppSelector(selectAllNotifications)?.slice(0, 5);
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -91,10 +36,6 @@ export function NotificationDropdown() {
       default:
         return <Bell className="h-4 w-4" />;
     }
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
   };
 
   return (
@@ -116,7 +57,7 @@ export function NotificationDropdown() {
             <h3 className="font-semibold text-foreground">Notifications</h3>
             {unreadCount > 0 && (
               <button
-                onClick={markAllAsRead}
+                onClick={operations.handleMarkAllAsRead}
                 className="text-xs text-primary hover:text-primary/80 transition-colors"
               >
                 Mark all as read
@@ -130,9 +71,9 @@ export function NotificationDropdown() {
           {notifications.length > 0 ? (
             notifications.map((notification) => (
               <div
-                key={notification.id}
+                key={notification._id}
                 className={`border-b border-border px-4 py-3 transition-colors hover:bg-secondary/50 cursor-pointer ${
-                  !notification.read ? "bg-secondary/20" : "bg-card"
+                  !notification.isRead ? "bg-secondary/20" : "bg-card"
                 }`}
               >
                 <div className="flex gap-3">
@@ -146,14 +87,14 @@ export function NotificationDropdown() {
                     <div className="flex items-start justify-between gap-2">
                       <p
                         className={`text-sm font-medium ${
-                          !notification.read
+                          !notification.isRead
                             ? "text-foreground"
                             : "text-muted-foreground"
                         }`}
                       >
                         {notification.title}
                       </p>
-                      {!notification.read && (
+                      {!notification.isRead && (
                         <div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-primary"></div>
                       )}
                     </div>
@@ -161,7 +102,7 @@ export function NotificationDropdown() {
                       {notification.message}
                     </p>
                     <p className="mt-2 text-xs text-muted-foreground/70">
-                      {notification.timestamp}
+                      {notification.createdAt}
                     </p>
                   </div>
                 </div>

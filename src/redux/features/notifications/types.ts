@@ -1,6 +1,5 @@
 export interface NotificationDto {
-  id: string;
-  _id: string; // from backend
+  _id: string;
   title: string;
   message: string;
   userId?: string;
