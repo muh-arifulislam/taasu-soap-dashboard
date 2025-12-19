@@ -8,8 +8,6 @@ import {
   type FetchArgs,
 } from "@reduxjs/toolkit/query/react";
 
-import { toast } from "sonner";
-
 import type { RootState } from "../store";
 import { logout } from "../features/auth/authSlice";
 
@@ -17,7 +15,7 @@ import { logout } from "../features/auth/authSlice";
 //http://localhost:5000/api/v1
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:5000/api/v1",
+  baseUrl: "https://taasu-soap-backend.vercel.app/api/v1",
   credentials: "include",
   prepareHeaders: (headers: Headers, { getState }) => {
     const token = (getState() as RootState).auth.token;
@@ -41,9 +39,6 @@ const baseQueryWithRefreshToken: BaseQueryFn<
     dispatch(logout());
   }
 
-  if (result?.error?.status === 404) {
-    toast.error((result?.error?.data as any)?.message);
-  }
   return result;
 };
 

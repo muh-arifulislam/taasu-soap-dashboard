@@ -2,13 +2,7 @@ import { addNotification } from "@/redux/features/notifications/notificationSlic
 import type { NotificationDto } from "@/redux/features/notifications/types";
 import { useAppDispatch } from "@/redux/hooks";
 import { useEffect } from "react";
-import { io } from "socket.io-client";
-
-const SOCKET_URL = "http://localhost:5001";
-
-const socket = io(SOCKET_URL, {
-  transports: ["websocket"],
-});
+import socket from "./socket";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const useAdminNotifications = () => {
@@ -16,6 +10,7 @@ export const useAdminNotifications = () => {
 
   useEffect(() => {
     socket.emit("join-admin");
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handler = (payload: any) => {
       // Convert payload to NotificationDto shape expected
